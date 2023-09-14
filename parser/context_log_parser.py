@@ -1,7 +1,9 @@
 """на вход передается context_log на выходе RawResponse или cachedRawResponse"""
 import json
 
-RAW_RESPONSE_PATTERNS: list[str] = ['cachedRawResponse', 'first raw response']
+RAW_RESPONSE_PATTERNS: list[str] = [
+    'first raw response', 'cachedRawResponse',
+]
 
 
 class InvalidContextLog(Exception):
@@ -39,9 +41,9 @@ class ContextLogParser:
             raise KeyError('context log did not contain nested context log')
 
     def get_string_with_raw_response(self, nested_context_log: list[str]) -> str:
-        for log_string in nested_context_log:
-            for pattern in RAW_RESPONSE_PATTERNS:
-                if pattern in log_string:
+        for patterns in RAW_RESPONSE_PATTERNS:
+            for log_string in nested_context_log:
+                if patterns in log_string:
                     return log_string
         raise LogStringWithRawRespNotExists
 
