@@ -115,3 +115,15 @@ class InfobipHlrParser(ContextLogParser):
             filtered_fields.update(msisdn_info_filter_by_nested_fields)
 
         return filtered_fields
+
+
+class XconnectParser(ContextLogParser):
+
+    def __init__(self, context_log: str) -> None:
+        super().__init__(context_log)
+
+    def get_raw_fields(self, fields_to_return: list[str] | None = None) -> dict:
+        if not fields_to_return:
+            return self.raw_response
+
+        return {field: self.raw_response[field] for field in fields_to_return if field in list(self.raw_response.keys())}
