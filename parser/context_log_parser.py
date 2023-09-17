@@ -1,13 +1,12 @@
 """на вход передается context_log на выходе RawResponse или cachedRawResponse"""
 import json
 
+from parser.errors import InvalidContextLogError, RawResponseNotFoundError, InvalidRawResponseError
+
+
 RAW_RESPONSE_PATTERNS: list[str] = [
     'first raw response', 'cachedRawResponse',
 ]
-
-
-class InvalidContextLog(Exception):
-    pass
 
 
 class LogStringWithRawRespNotExists(Exception):
@@ -27,12 +26,12 @@ class ContextLogParser:
         try:
             self.context_log = json.loads(context_log)
         except json.JSONDecodeError:
-            raise InvalidContextLog
+            raise InvalidContextLogError
 
         try:
             self.raw_response = json.loads(self.get_raw_response())
         except json.JSONDecodeError:
-            raise InvalidRawResponse
+            raise InvalidRawResponseError
 
     def get_nested_context_log(self) -> list[str]:
         try:
@@ -45,7 +44,7 @@ class ContextLogParser:
             for log_string in nested_context_log:
                 if patterns in log_string:
                     return log_string
-        raise LogStringWithRawRespNotExists
+        raise RawResponseNotFoundError
 
     def get_raw_response(self) -> str:
         nested_context_log = self.get_nested_context_log()
