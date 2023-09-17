@@ -1,14 +1,14 @@
-class HlrParserError(Exception):
+class ContextLogParserError(Exception):
     pass
 
 
-class InvalidContextLogError(HlrParserError):
+class InvalidContextLogError(ContextLogParserError):
     pass
 
 
-class RawResponseNotFoundError(HlrParserError):
+class RawResponseNotFoundError(ContextLogParserError):
     pass
 
 
-class InvalidRawResponseError(HlrParserError):
+class InvalidRawResponseError(ContextLogParserError):
     pass
