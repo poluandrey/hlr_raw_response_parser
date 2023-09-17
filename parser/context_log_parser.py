@@ -21,17 +21,17 @@ class ContextLogParser:
     """принимает на вход строку с ответом от HLR и достает из нее  ответ провайдера"""
 
     def __init__(self, context_log: str) -> None:
-        if not len(context_log):
+        if not context_log:
             raise ValueError('empty context_log')
         try:
             self.context_log = json.loads(context_log)
-        except json.JSONDecodeError:
-            raise InvalidContextLogError
+        except json.JSONDecodeError as error:
+            raise InvalidContextLogError(error) from None
 
         try:
             self.raw_response = json.loads(self.get_raw_response())
-        except json.JSONDecodeError:
-            raise InvalidRawResponseError
+        except json.JSONDecodeError as error:
+            raise InvalidRawResponseError(error) from None
 
     def get_nested_context_log(self) -> list[str]:
         try:
