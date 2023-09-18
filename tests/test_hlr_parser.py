@@ -1,4 +1,4 @@
-from parser.hlr_parser import TmtHlrParser, InfobipHlrParser, XconnectParser
+from parser.hlr_parser import TmtHlrHlrParser, InfobipHlrHlrParser, XconnectHlrParser
 
 TMT_HLR_ALL_RAW_FIELDS = ['cic',
                           'error',
@@ -34,13 +34,13 @@ XCONNECT_CONTEXT_LOG_CACHED = '{"startTime":"2023-09-15 09:40:17","contextLog":[
 
 
 def test__TmtHlrParser__return_all_fields():
-    parser = TmtHlrParser(TMT_CONTEXT_LOG)
+    parser = TmtHlrHlrParser(TMT_CONTEXT_LOG)
 
     assert TMT_HLR_ALL_RAW_FIELDS == list(parser.get_raw_fields().keys())
 
 
 def test__TmtHlrParser__return_all_fields_for_cached_response():
-    parser = TmtHlrParser(TMT_CONTEXT_LOG_CACHED)
+    parser = TmtHlrHlrParser(TMT_CONTEXT_LOG_CACHED)
 
     assert TMT_HLR_ALL_RAW_FIELDS == list(parser.get_raw_fields().keys())
 
@@ -48,7 +48,7 @@ def test__TmtHlrParser__return_all_fields_for_cached_response():
 def test__TmtHlrParser__return_specified_fields():
     filters = ['present', 'status']
 
-    parser = TmtHlrParser(TMT_CONTEXT_LOG)
+    parser = TmtHlrHlrParser(TMT_CONTEXT_LOG)
 
     assert list(parser.get_raw_fields(filters).keys()) == filters
 
@@ -56,19 +56,19 @@ def test__TmtHlrParser__return_specified_fields():
 def test__TmtHlrParser__return_specified_fields_for_cached_response():
     filters = ['present', 'status']
 
-    parser = TmtHlrParser(TMT_CONTEXT_LOG_CACHED)
+    parser = TmtHlrHlrParser(TMT_CONTEXT_LOG_CACHED)
 
     assert list(parser.get_raw_fields(filters).keys()) == filters
 
 
 def test__InfobipHlrParser__return_all_fields():
-    parser = InfobipHlrParser(INFOBIP_CONTEXT_LOG)
+    parser = InfobipHlrHlrParser(INFOBIP_CONTEXT_LOG)
 
     assert list(parser.get_raw_fields().keys()) == INFOBIP_HLR_ALL_RAW_FIELDS
 
 
 def test__InfobipHlrParser__return_all_fields_for_cached_response():
-    parser = InfobipHlrParser(INFOBIP_CONTEXT_LOG_CACHED)
+    parser = InfobipHlrHlrParser(INFOBIP_CONTEXT_LOG_CACHED)
 
     assert list(parser.get_raw_fields().keys()) == INFOBIP_HLR_ALL_RAW_FIELDS
 
@@ -76,7 +76,7 @@ def test__InfobipHlrParser__return_all_fields_for_cached_response():
 def test__InfobipHlrParser__return_specified_fields_filtered_by_flat_filter():
     filters = ['to', 'roaming']
 
-    parser = InfobipHlrParser(INFOBIP_CONTEXT_LOG)
+    parser = InfobipHlrHlrParser(INFOBIP_CONTEXT_LOG)
 
     assert list(parser.get_raw_fields(filters).keys()) == filters
 
@@ -84,7 +84,7 @@ def test__InfobipHlrParser__return_specified_fields_filtered_by_flat_filter():
 def test__InfobipHlrParser__return_specified_fields_filtered_by_flat_filter_for_cached_response():
     filters = ['to', 'roaming']
 
-    parser = InfobipHlrParser(INFOBIP_CONTEXT_LOG_CACHED)
+    parser = InfobipHlrHlrParser(INFOBIP_CONTEXT_LOG_CACHED)
 
     assert list(parser.get_raw_fields(filters).keys()) == filters
 
@@ -93,7 +93,7 @@ def test__InfobipHlrParser__return_specified_fields_filtered_by_nested_filter():
     expected_fields = ['groupId', 'groupName']
 
     filters = [{'status': ['groupId', 'groupName']}]
-    parser = InfobipHlrParser(INFOBIP_CONTEXT_LOG)
+    parser = InfobipHlrHlrParser(INFOBIP_CONTEXT_LOG)
 
     assert list(parser.get_raw_fields(filters)['status']) == expected_fields
 
@@ -102,26 +102,26 @@ def test__InfobipHlrParser__return_specified_fields_filtered_by_nested_filter_fo
     expected_fields = ['groupId', 'groupName']
 
     filters = [{'status': ['groupId', 'groupName']}]
-    parser = InfobipHlrParser(INFOBIP_CONTEXT_LOG_CACHED)
+    parser = InfobipHlrHlrParser(INFOBIP_CONTEXT_LOG_CACHED)
 
     assert list(parser.get_raw_fields(filters)['status']) == expected_fields
 
 
 def test__XconnectHlrParser__return_all_fields():
-    parser = XconnectParser(XCONNECT_CONTEXT_LOG)
+    parser = XconnectHlrParser(XCONNECT_CONTEXT_LOG)
 
     assert list(parser.get_raw_fields().keys()) == XCONNECT_HLR_ALL_RAW_FIELDS
 
 
 def test__XconnectHlrParser__return_all_fields_for_cached_response():
-    parser = XconnectParser(XCONNECT_CONTEXT_LOG_CACHED)
+    parser = XconnectHlrParser(XCONNECT_CONTEXT_LOG_CACHED)
 
     assert list(parser.get_raw_fields().keys()) == XCONNECT_HLR_ALL_RAW_FIELDS
 
 
 def test__XconnectHlrParser__return_specified_fields():
     filters = ['tn', 'cc']
-    parser = XconnectParser(XCONNECT_CONTEXT_LOG)
+    parser = XconnectHlrParser(XCONNECT_CONTEXT_LOG)
 
     assert list(parser.get_raw_fields(filters).keys()) == filters
 
@@ -129,7 +129,7 @@ def test__XconnectHlrParser__return_specified_fields():
 def test__XconnectHlrParser__return_specified_fields_for_cached_response():
     filters = ['tn', 'cc']
 
-    parser = XconnectParser(XCONNECT_CONTEXT_LOG_CACHED)
+    parser = XconnectHlrParser(XCONNECT_CONTEXT_LOG_CACHED)
 
     assert list(parser.get_raw_fields(filters).keys()) == filters
 

@@ -2,10 +2,12 @@
 на вход передается context_log на выходе RawResponse или cachedRawResponse
 """
 import json
+from typing import Any
 
 from parser.errors import (InvalidContextLogError,
                            RawResponseNotFoundError,
                            InvalidRawResponseError)
+from parser.types import Json
 
 RAW_RESPONSE_PATTERNS: list[str] = [
     'first raw response', 'cachedRawResponse',
@@ -36,8 +38,10 @@ def get_record_with_raw_response(nested_context_log: list[str]) -> str:
     raise RawResponseNotFoundError
 
 
+
+
 # как правильно анотировать JSON?
-def get_raw_response(raw_response_record: str) -> dict | list[dict]:
+def get_raw_response(raw_response_record: str) -> Json:
     first_brace_index = raw_response_record.find('{')
     last_brace_index = raw_response_record.rfind('}')
     raw_response = raw_response_record[first_brace_index:last_brace_index + 1]
@@ -47,7 +51,7 @@ def get_raw_response(raw_response_record: str) -> dict | list[dict]:
         raise InvalidRawResponseError(error) from None
 
 
-def parse_context_log(context_log: str) -> dict | list[dict]:
+def parse_context_log(context_log: str) -> Json:
     serialized_context_log = serialize_context_log(context_log)
     nested_context_log = get_nested_context_log(serialized_context_log)
     record_with_raw_response = get_record_with_raw_response(nested_context_log)
