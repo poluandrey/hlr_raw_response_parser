@@ -6,7 +6,6 @@ from parser.errors import InvalidRawResponseError
 from parser.types import Json
 
 
-# фабричный метод который в зависимости от передонного типа парсера создаст Парсер(возвращает протокол)
 @dataclass(frozen=True, kw_only=True)
 class MsisdnInfo:
     msisdn: str
@@ -104,7 +103,9 @@ class InfobipHlrHlrParser(HlrParser):
         if 'results' not in list[raw_response.keys()]:
             raise InvalidRawResponseError('Results not found in raw response')
         if not isinstance(raw_response['results'], list):
-            raise InvalidRawResponseError('Msisdn details not found in raw response')
+            raise InvalidRawResponseError(
+                'Msisdn details not found in raw response'
+            )
         return raw_response['results'][0]
 
     def get_msisdn_info(self, raw_response):
