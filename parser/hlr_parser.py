@@ -47,13 +47,13 @@ class TmtHlrHlrParser(HlrParser):
             raise InvalidRawResponseError('msisdn not found in raw response')
         return list(raw_response.keys())[0]
 
-    def gem_msisdn_info(self, raw_response):
+    def get_msisdn_info(self, raw_response):
         msisdn = self.get_msisdn_from_raw_response(raw_response)
         raw_info = raw_response[msisdn]
-        mcc: str = raw_info.get('mnc')
-        mnc: str = raw_info.get('mnc')
-        ported: str = raw_info.get('ported')
-        present: str = raw_info.get('present')
+        mcc = raw_info.get('mnc')
+        mnc = raw_info.get('mnc')
+        ported = raw_info.get('ported')
+        present = raw_info.get('present')
         return MsisdnInfo(
             msisdn=msisdn,
             mcc=mcc,
