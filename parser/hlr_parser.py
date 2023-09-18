@@ -1,6 +1,6 @@
 from typing import Any
 
-from parser.context_log_parser import ContextLogParser
+from parser.context_log_parser import parse_context_log
 
 
 def filter_by_flat_field(msisdn_info: dict, flat_fields: list[str]) -> dict[str, Any]:
@@ -19,7 +19,7 @@ def filter_by_nested_field(msisdn_info: dict, nested_fields: dict[str, list[str]
     return filtered_msisdn_info
 
 
-class TmtHlrParser(ContextLogParser):
+class TmtHlrParser:
     """
     raw response example
     {
@@ -42,7 +42,7 @@ class TmtHlrParser(ContextLogParser):
     """
 
     def __init__(self, context_log: str) -> None:
-        super().__init__(context_log)
+        self.raw_response = parse_context_log(context_log)
 
     def get_msisdn_from_raw_response(self) -> str:
         return list(self.raw_response.keys())[0]
@@ -56,7 +56,7 @@ class TmtHlrParser(ContextLogParser):
         return filtered_raw_resp
 
 
-class InfobipHlrParser(ContextLogParser):
+class InfobipHlrParser:
     """
     raw response example
     {"results": [
@@ -92,7 +92,7 @@ class InfobipHlrParser(ContextLogParser):
     """
 
     def __init__(self, context_log: str) -> None:
-        super().__init__(context_log)
+        self.raw_response = parse_context_log(context_log)
 
     def retrieve_result(self) -> dict:
         return self.raw_response['results'][0]
@@ -117,10 +117,10 @@ class InfobipHlrParser(ContextLogParser):
         return filtered_fields
 
 
-class XconnectParser(ContextLogParser):
+class XconnectParser:
 
     def __init__(self, context_log: str) -> None:
-        super().__init__(context_log)
+        self.raw_response = parse_context_log(context_log)
 
     def get_raw_fields(self, fields_to_return: list[str] | None = None) -> dict:
         if not fields_to_return:

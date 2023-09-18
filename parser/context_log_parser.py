@@ -3,7 +3,6 @@ import json
 
 from parser.errors import InvalidContextLogError, RawResponseNotFoundError, InvalidRawResponseError
 
-
 RAW_RESPONSE_PATTERNS: list[str] = [
     'first raw response', 'cachedRawResponse',
 ]
@@ -33,7 +32,8 @@ def get_record_with_raw_response(nested_context_log: list[str]) -> str:
     raise RawResponseNotFoundError
 
 
-def get_raw_response(raw_response_record: str) -> str:
+# как правильно анотировать JSON?
+def get_raw_response(raw_response_record: str) -> dict | list[dict]:
     first_brace_index = raw_response_record.find('{')
     last_brace_index = raw_response_record.rfind('}')
     raw_response = raw_response_record[first_brace_index:last_brace_index + 1]
@@ -42,6 +42,12 @@ def get_raw_response(raw_response_record: str) -> str:
     except json.JSONDecodeError as error:
         raise InvalidRawResponseError(error) from None
 
+
+def parse_context_log(context_log: str) -> dict | list[dict]:
+    serialized_context_log = serialize_context_log(context_log)
+    nested_context_log = get_nested_context_log(serialized_context_log)
+    record_with_raw_response = get_record_with_raw_response(nested_context_log)
+    return get_raw_response(record_with_raw_response)
 
 # class ContextLogParser:
 #     """принимает на вход строку с ответом от HLR и достает из нее  ответ провайдера"""
