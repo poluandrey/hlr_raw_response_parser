@@ -1,9 +1,8 @@
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Protocol
-
 from parser.errors import InvalidRawResponseError
 from parser.types import Json
+from typing import Protocol
 
 
 @dataclass(frozen=True, kw_only=True)

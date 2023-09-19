@@ -2,10 +2,8 @@
 на вход передается context_log на выходе RawResponse или cachedRawResponse
 """
 import json
-
-from parser.errors import (InvalidContextLogError,
-                           RawResponseNotFoundError,
-                           InvalidRawResponseError)
+from parser.errors import (InvalidContextLogError, InvalidRawResponseError,
+                           RawResponseNotFoundError)
 from parser.types import Json
 
 RAW_RESPONSE_PATTERNS: list[str] = [
