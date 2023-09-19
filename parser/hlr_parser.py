@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, auto
 from typing import Protocol
 
 from parser.errors import InvalidRawResponseError
@@ -183,20 +183,20 @@ class XconnectMnpParser(HlrParser):
 
 
 class HlrParserType(Enum):
-    TMT_HLR = TmtHlrHlrParser
-    INFOBIP_HLR = InfobipHlrHlrParser
-    XCONNECT_HLR = XconnectHlrParser
-    XCONNECT_MNP = XconnectMnpParser
+    TMT_HLR = auto()
+    INFOBIP_HLR = auto()
+    XCONNECT_HLR = auto()
+    XCONNECT_MNP = auto()
 
 
 def create_parser(provider_type: HlrParserType) -> HlrParser:
     if provider_type == HlrParserType.TMT_HLR:
         return TmtHlrHlrParser()
-    elif provider_type == HlrParserType.INFOBIP_HLR:
+    if provider_type == HlrParserType.INFOBIP_HLR:
         return InfobipHlrHlrParser()
-    elif provider_type == HlrParserType.XCONNECT_HLR:
+    if provider_type == HlrParserType.XCONNECT_HLR:
         return XconnectHlrParser()
-    elif provider_type == HlrParserType.XCONNECT_MNP:
+    if provider_type == HlrParserType.XCONNECT_MNP:
         return XconnectMnpParser()
     else:
         raise ValueError('Invalid provider type')
