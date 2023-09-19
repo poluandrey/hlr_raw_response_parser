@@ -100,7 +100,7 @@ class InfobipHlrHlrParser(HlrParser):
     def get_result(self, raw_response) -> Json:
         if not isinstance(raw_response, dict):
             raise InvalidRawResponseError('Unexpected raw response format')
-        if 'results' not in list[raw_response.keys()]:
+        if 'results' not in list(raw_response.keys()):
             raise InvalidRawResponseError('Results not found in raw response')
         if not isinstance(raw_response['results'], list):
             raise InvalidRawResponseError(
