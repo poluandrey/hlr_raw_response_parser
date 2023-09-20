@@ -17,7 +17,7 @@ def serialize_context_log(context_log: str):
     try:
         return json.loads(context_log)
     except json.JSONDecodeError as error:
-        raise InvalidContextLogError(error) from error
+        raise InvalidContextLogError from error
 
 
 def get_nested_context_log(context_log: dict[str, Any]) -> list[str]:
@@ -46,7 +46,7 @@ def get_record_with_raw_response(nested_context_log: list[str]) -> str:
     return raw_response_lines[0]
 
 
-def get_raw_response(raw_response_record: str) -> Json:
+def get_raw_response(raw_response_record: str) -> dict[str, Any]:
     first_brace_index = raw_response_record.find('{')
     last_brace_index = raw_response_record.rfind('}')
     raw_response = raw_response_record[first_brace_index:last_brace_index + 1]
