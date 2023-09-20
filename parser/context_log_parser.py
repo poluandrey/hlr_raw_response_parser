@@ -40,7 +40,6 @@ def contain_raw_response(line: str) -> bool:
 
 def get_record_with_raw_response(nested_context_log: list[str]) -> str:
     raw_response_lines = list(filter(contain_raw_response, nested_context_log))
-    print(raw_response_lines)
     if not raw_response_lines:
         raise RawResponseNotFoundError
 
@@ -62,5 +61,4 @@ def parse_context_log(context_log: str) -> dict[str, Any]:
     serialized_context_log = serialize_context_log(context_log)
     nested_context_log = get_nested_context_log(serialized_context_log)
     record_with_raw_response = get_record_with_raw_response(nested_context_log)
-    print(record_with_raw_response)
     return get_raw_response(record_with_raw_response)
