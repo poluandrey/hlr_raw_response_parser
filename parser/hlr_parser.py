@@ -1,11 +1,10 @@
 from dataclasses import dataclass
 from enum import Enum, auto
 from parser.errors import InvalidRawResponseError
-from parser.types import Json
-from typing import Protocol
+from typing import Any, Protocol
 
 
-@dataclass(frozen=True, kw_only=True)
+@dataclass(frozen=True, kw_only=True, slots=True)
 class MsisdnInfo:
     msisdn: str
     mcc: str
@@ -15,7 +14,7 @@ class MsisdnInfo:
 
 
 class HlrParser(Protocol):
-    def get_msisdn_info(self, raw_response: Json) -> MsisdnInfo:
+    def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
         pass
 
 
@@ -43,9 +42,10 @@ class TmtHlrHlrParser(HlrParser):
     def get_msisdn_from_raw_response(self, raw_response) -> str:
         if not isinstance(raw_response, dict):
             raise InvalidRawResponseError('msisdn not found in raw response')
+
         return list(raw_response.keys())[0]
 
-    def get_msisdn_info(self, raw_response):
+    def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
         msisdn = self.get_msisdn_from_raw_response(raw_response)
         raw_info = raw_response[msisdn]
         mcc = raw_info.get('mnc')
@@ -61,7 +61,7 @@ class TmtHlrHlrParser(HlrParser):
         )
 
 
-class InfobipHlrHlrParser(HlrParser):
+class InfobipHlrHlrParser:
     """
     raw response example
     {"results": [
@@ -96,23 +96,30 @@ class InfobipHlrHlrParser(HlrParser):
      }]}
     """
 
-    def get_result(self, raw_response) -> Json:
+    def get_result(self, raw_response) -> dict[str, Any]:
         if not isinstance(raw_response, dict):
-            raise InvalidRawResponseError('Unexpected raw response format')
+            raise InvalidRawResponseError(
+                'Raw response is not a dict instance',
+            )
+
         if 'results' not in list(raw_response.keys()):
-            raise InvalidRawResponseError('Results not found in raw response')
+            raise InvalidRawResponseError(
+                'Results in raw response is not a list instance',
+            )
+
         if not isinstance(raw_response['results'], list):
             raise InvalidRawResponseError(
-                'Msisdn details not found in raw response'
+                'Msisdn details not found in raw response',
             )
+
         return raw_response['results'][0]
 
-    def get_msisdn_info(self, raw_response):
+    def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
         result = self.get_result(raw_response)
-        msisdn = result.get('to')
-        mcc = result.get('mccMnc')[:2]
-        mnc = result.get('mccMnc')[2:]
-        ported = result.get('ported')
+        msisdn = result['to']
+        mcc = result['mccMnc'][:2]
+        mnc = result['mccMnc'][2:]
+        ported = result['ported']
         present = None
         return MsisdnInfo(
             msisdn=msisdn,
@@ -123,7 +130,7 @@ class InfobipHlrHlrParser(HlrParser):
         )
 
 
-class XconnectHlrParser(HlrParser):
+class XconnectHlrParser:
     """
     {
     'tn': '306980165782',
@@ -138,11 +145,11 @@ class XconnectHlrParser(HlrParser):
     'rc': '000'
     }
     """
-    def get_msisdn_info(self, raw_response):
-        msisdn = raw_response.get('tn')
-        mcc = raw_response.get('mcc')
-        mnc = raw_response.get('mnc')
-        ported = raw_response.get('npi')
+    def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
+        msisdn = raw_response['tn']
+        mcc = raw_response['mcc']
+        mnc = raw_response['mnc']
+        ported = raw_response['npi']
         present = None
         return MsisdnInfo(
             msisdn=msisdn,
@@ -153,7 +160,7 @@ class XconnectHlrParser(HlrParser):
         )
 
 
-class XconnectMnpParser(HlrParser):
+class XconnectMnpParser:
     """
     {'tn': '306980165782',
     'npdi': True,
@@ -166,11 +173,11 @@ class XconnectMnpParser(HlrParser):
     'nt': 'wireless'}
     """
 
-    def get_msisdn_info(self, raw_response):
-        msisdn = raw_response.get('tn')
-        mcc = raw_response.get('mcc')
-        mnc = raw_response.get('mnc')
-        ported = raw_response.get('npi')
+    def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
+        msisdn = raw_response['tn']
+        mcc = raw_response['mcc']
+        mnc = raw_response['mnc']
+        ported = raw_response['npi']
         present = None
         return MsisdnInfo(
             msisdn=msisdn,
@@ -189,13 +196,13 @@ class HlrParserType(Enum):
 
 
 def create_parser(provider_type: HlrParserType) -> HlrParser:
-    if provider_type == HlrParserType.TMT_HLR:
-        return TmtHlrHlrParser()
-    if provider_type == HlrParserType.INFOBIP_HLR:
-        return InfobipHlrHlrParser()
-    if provider_type == HlrParserType.XCONNECT_HLR:
-        return XconnectHlrParser()
-    if provider_type == HlrParserType.XCONNECT_MNP:
-        return XconnectMnpParser()
-    else:
-        raise ValueError('Invalid provider type')
+    match provider_type:
+        case provider_type.TMT_HLR:
+            return TmtHlrHlrParser()
+        case provider_type.INFOBIP_HLR:
+            return InfobipHlrHlrParser()
+        case provider_type.XCONNECT_MNP:
+            return XconnectMnpParser()
+        case provider_type.XCONNECT_HLR:
+            return XconnectHlrParser()
+    raise ValueError('Unexpected provider type')
