@@ -58,7 +58,7 @@ def get_raw_response(raw_response_record: str) -> Json:
         raise InvalidRawResponseError(error) from error
 
 
-def parse_context_log(context_log: str) -> Json:
+def parse_context_log(context_log: str) -> dict[str, Any]:
     serialized_context_log = serialize_context_log(context_log)
     nested_context_log = get_nested_context_log(serialized_context_log)
     record_with_raw_response = get_record_with_raw_response(nested_context_log)
