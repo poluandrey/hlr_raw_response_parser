@@ -1,3 +1,4 @@
-from typing import Any
+from typing import Any, TypeAlias
 
-Json = dict[str, Any] | list[dict[str, Any]]
+Json: TypeAlias = dict[str, Any] | list[dict[str, Any]]
+RawResponse = dict[str, Any]
