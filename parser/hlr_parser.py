@@ -1,15 +1,16 @@
 from dataclasses import dataclass
+from pydantic import BaseModel
 from enum import Enum, auto
 from parser.errors import InvalidRawResponseError
 from typing import Any, Protocol
 
 
-@dataclass(frozen=True, kw_only=True, slots=True)
-class MsisdnInfo:
+# @dataclass(frozen=True, kw_only=True, slots=True)
+class MsisdnInfo(BaseModel):
     msisdn: str
     mcc: str
     mnc: str
-    ported: str
+    ported: int
     present: str | None
 
 
