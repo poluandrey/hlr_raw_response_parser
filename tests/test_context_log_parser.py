@@ -44,6 +44,5 @@ def test__get_record_with_raw_response__return_raw_response(valid_context_log):
 def test__get_raw_response__raise_error_if_raw_response_is_not_serializable(not_serializable_raw_response):
     context_log = serialize_context_log(not_serializable_raw_response)
     nested_context_log = get_nested_context_log(context_log)
-
     with pytest.raises(RawResponseNotFoundError):
         get_raw_response(nested_context_log)

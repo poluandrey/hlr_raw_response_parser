@@ -39,7 +39,10 @@ class TmtHlrHlrParser(HlrParser):
     }
     }
     """
-    def get_msisdn_from_raw_response(self, raw_response) -> str:
+    def get_msisdn_from_raw_response(
+            self,
+            raw_response: dict[str, Any],
+    ) -> str:
         if not isinstance(raw_response, dict):
             raise InvalidRawResponseError('msisdn not found in raw response')
 
@@ -96,12 +99,7 @@ class InfobipHlrHlrParser:
      }]}
     """
 
-    def get_result(self, raw_response) -> dict[str, Any]:
-        if not isinstance(raw_response, dict):
-            raise InvalidRawResponseError(
-                'Raw response is not a dict instance',
-            )
-
+    def get_result(self, raw_response: dict[str, Any]) -> dict[str, Any]:
         if 'results' not in list(raw_response.keys()):
             raise InvalidRawResponseError(
                 'Results in raw response is not a list instance',
@@ -205,4 +203,5 @@ def create_parser(provider_type: HlrParserType) -> HlrParser:
             return XconnectMnpParser()
         case provider_type.XCONNECT_HLR:
             return XconnectHlrParser()
-    raise ValueError('Unexpected provider type')
+        case _:
+            raise ValueError('Unexpected provider type')

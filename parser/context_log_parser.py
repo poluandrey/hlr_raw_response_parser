@@ -2,9 +2,8 @@ import json
 import re
 from parser.errors import (ContextLogNotFoundError, InvalidContextLogError,
                            InvalidRawResponseError, RawResponseNotFoundError)
-from typing import Any, AnyStr
+from typing import Any
 
-from parser.types import Json
 
 RAW_RESPONSE_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r'.*first raw response: (\{.*\})', re.S),
@@ -44,7 +43,7 @@ def is_raw_response(line: str) -> re.Match[str] | None:
 def get_raw_response(nested_context_log: list[str]) -> str:
     for log_rec in nested_context_log:
         if match := is_raw_response(log_rec):
-            return match.group()
+            return match.group(1)
 
     raise RawResponseNotFoundError
 
