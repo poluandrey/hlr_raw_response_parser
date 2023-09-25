@@ -2,15 +2,17 @@ import json
 import re
 from parser.errors import (ContextLogNotFoundError, InvalidContextLogError,
                            InvalidRawResponseError, RawResponseNotFoundError)
-from parser.types import Json
-from typing import Any
+from typing import Any, AnyStr
 
-RAW_RESPONSE_PATTERNS: list[str] = [
-    r'.*first raw response: (\{.*\})', r'.*cachedRawResponse: (\{.*\})',
+from parser.types import Json
+
+RAW_RESPONSE_PATTERNS: list[re.Pattern[str]] = [
+    re.compile(r'.*first raw response: (\{.*\})', re.S),
+    re.compile(r'.*cachedRawResponse: (\{.*\})', re.S),
 ]
 
 
-def serialize_context_log(context_log: str):
+def serialize_context_log(context_log: str) -> dict[str, Any]:
     if not context_log:
         raise ContextLogNotFoundError
 
@@ -29,36 +31,29 @@ def get_nested_context_log(context_log: dict[str, Any]) -> list[str]:
     return nested_context_log
 
 
-def contain_raw_response(line: str) -> bool:
+def is_raw_response(line: str) -> re.Match[str] | None:
+    match = None
     for pattern in RAW_RESPONSE_PATTERNS:
+        match = re.match(pattern, line)
+        if match:
+            break
 
-        if re.match(pattern, line.replace('\n', '')):
-            return True
-
-    return False
-
-
-def get_record_with_raw_response(nested_context_log: list[str]) -> str:
-    raw_response_lines = list(filter(contain_raw_response, nested_context_log))
-    if not raw_response_lines:
-        raise RawResponseNotFoundError
-
-    return raw_response_lines[0]
+    return match
 
 
-def get_raw_response(raw_response_record: str) -> dict[str, Any]:
-    first_brace_index = raw_response_record.find('{')
-    last_brace_index = raw_response_record.rfind('}')
-    raw_response = raw_response_record[first_brace_index:last_brace_index + 1]
+def get_raw_response(nested_context_log: list[str]) -> str:
+    for log_rec in nested_context_log:
+        if match := is_raw_response(log_rec):
+            return match.group()
 
-    try:
-        return json.loads(raw_response)
-    except json.JSONDecodeError as error:
-        raise InvalidRawResponseError(error) from error
+    raise RawResponseNotFoundError
 
 
 def parse_context_log(context_log: str) -> dict[str, Any]:
     serialized_context_log = serialize_context_log(context_log)
     nested_context_log = get_nested_context_log(serialized_context_log)
-    record_with_raw_response = get_record_with_raw_response(nested_context_log)
-    return get_raw_response(record_with_raw_response)
+    raw_response = get_raw_response(nested_context_log)
+    try:
+        return json.loads(raw_response)
+    except json.JSONDecodeError as error:
+        raise InvalidRawResponseError from error
