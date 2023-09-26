@@ -6,7 +6,6 @@ from parser.hlr_responses import (InfobipHlrResponse,
                                   TmtHlrResponse,
                                   XconnectHlrResponse,
                                   XconnectMnpResponse)
-from parser.types import HlrResponse
 
 
 class MsisdnInfo(BaseModel):
@@ -19,12 +18,6 @@ class MsisdnInfo(BaseModel):
 
 class HlrParser(Protocol):
     def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
-        pass
-
-    def convert_raw_response_to_obj(
-            self,
-            raw_response: dict[str, Any],
-    ) -> HlrResponse:
         pass
 
 
@@ -68,7 +61,7 @@ class TmtHlrHlrParser(HlrParser):
     def convert_raw_response_to_obj(
             self,
             raw_response: dict[str, Any],
-    ) -> HlrResponse:
+    ) -> TmtHlrResponse:
         for _, value in raw_response.items():
             return TmtHlrResponse(**value)
 
@@ -140,7 +133,7 @@ class InfobipHlrHlrParser:
     def convert_raw_response_to_obj(
             self,
             raw_response: dict[str, Any],
-    ) -> HlrResponse:
+    ) -> InfobipHlrResponse:
         return InfobipHlrResponse(**raw_response)
 
 
@@ -173,7 +166,7 @@ class XconnectHlrParser:
     def convert_raw_response_to_obj(
             self,
             raw_response: dict[str, Any],
-    ) -> HlrResponse:
+    ) -> XconnectHlrResponse:
         return XconnectHlrResponse(**raw_response)
 
 
@@ -207,7 +200,7 @@ class XconnectMnpParser:
     def convert_raw_response_to_obj(
             self,
             raw_response: dict[str, Any],
-    ) -> HlrResponse:
+    ) -> XconnectMnpResponse:
         return XconnectMnpResponse(**raw_response)
 
 
