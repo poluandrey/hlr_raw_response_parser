@@ -1,7 +1,9 @@
+from parser.context_log_parser import (get_nested_context_log,
+                                       get_raw_response, serialize_context_log)
+from parser.errors import (ContextLogNotFoundError, InvalidContextLogError,
+                           RawResponseNotFoundError)
+
 import pytest
-from parser.context_log_parser import serialize_context_log, get_nested_context_log, get_raw_response
-from parser.errors import InvalidContextLogError, RawResponseNotFoundError, \
-    ContextLogNotFoundError
 
 
 def test__serialize_context_log__raise_error_when_empty_context_log_provided():

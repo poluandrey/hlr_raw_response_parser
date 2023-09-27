@@ -1,9 +1,9 @@
-import pytest
-
 from parser.context_log_parser import parse_context_log
-from parser.hlr_parser import TmtHlrHlrParser, InfobipHlrHlrParser, XconnectHlrParser, XconnectMnpParser, create_parser, \
-    HlrParserType, MsisdnInfo
+from parser.hlr_parser import (HlrParserType, InfobipHlrHlrParser, MsisdnInfo,
+                               TmtHlrHlrParser, XconnectHlrParser,
+                               XconnectMnpParser, create_parser)
 
+import pytest
 
 HLR_PARSERS = [
     (HlrParserType.XCONNECT_HLR, XconnectHlrParser),

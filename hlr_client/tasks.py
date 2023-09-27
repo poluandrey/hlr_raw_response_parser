@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from itertools import product
 
-from hlr_client.client import (HlrClient, HlrFailedResponse,
-                               HlrSuccessfulResponse)
+from hlr_client.client import HlrClient, HlrFailedResponse
+from hlr_client.errors import (HlrClientHTTPError, HlrClientInternalError,
+                               HlrProxyError)
 
 
 @dataclass(kw_only=True, frozen=True, slots=True)
@@ -11,34 +12,41 @@ class Task:
     msisdns: list[str]
 
 
-@dataclass(kw_only=True, slots=True)
-class TaskResult:
-    failed: list[HlrFailedResponse]
-    success: list[HlrSuccessfulResponse]
-
-    def append_hlr_response(
-            self,
-            hlr_response: HlrFailedResponse | HlrSuccessfulResponse,
-    ) -> None:
-        if isinstance(hlr_response, HlrSuccessfulResponse):
-            self.success.append(hlr_response)
-            return
-
-        self.failed.append(hlr_response)
-        return
-
-
-def handle_task(task: Task, hlr_client: HlrClient) -> TaskResult:
-    task_result = TaskResult(
-        failed=[],
-        success=[],
-    )
+def handle_task(task: Task, hlr_client: HlrClient) -> tuple[list, list]:
+    details, errors = [], []
     for msisdn, provider in product(task.msisdns, task.providers):
-        msisdn_info = hlr_client.get_mccmnc_info(
-            msisdn=msisdn,
-            provider=provider,
-        )
+        try:
+            msisdn_info = hlr_client.get_mccmnc_info(
+                msisdn=msisdn,
+                provider=provider,
+            )
+            details.append(msisdn_info)
 
-        task_result.append_hlr_response(msisdn_info)
+        except HlrProxyError as error:
+            errors.append(
+                HlrFailedResponse(
+                    message=error.message,
+                    msisdn=error.msisdn,
+                    result=error.result,
+                    message_id=error.message_id,
+                ),
+            )
+        except HlrClientHTTPError as error:
+            errors.append(
+                HlrFailedResponse(
+                    message='Internal HTTP error',
+                    msisdn=msisdn,
+                    provider=provider,
+                    http_error=error.error_code,
+                ),
+            )
+        except HlrClientInternalError as error:
+            errors.append(
+                HlrFailedResponse(
+                    msisdn=msisdn,
+                    provider=provider,
+                    message=str(error),
+                ),
+            )
 
-    return task_result
+    return details, errors

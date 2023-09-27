@@ -1,5 +1,5 @@
-from django.db import models
 from django.core.validators import MaxLengthValidator, MinLengthValidator
+from django.db import models
 
 
 class ProductType(models.Model):
@@ -15,7 +15,12 @@ class ProductType(models.Model):
 class Carrier(models.Model):
     alaris_car_id = models.PositiveIntegerField()
     car_name = models.CharField(max_length=120)
-    car_is_active = models.IntegerField(validators=[MinLengthValidator(0), MaxLengthValidator(1)])
+    car_is_active = models.IntegerField(
+        validators=[
+            MinLengthValidator(0),
+            MaxLengthValidator(1),
+        ],
+    )
     insert_time = models.DateTimeField(auto_now_add=True)
     last_update_time = models.DateTimeField(auto_now=True)
 
@@ -32,10 +37,20 @@ class Product(models.Model):
         on_delete=models.PROTECT,
         related_name='products',
     )
-    is_active = models.IntegerField(validators=[MinLengthValidator(0), MaxLengthValidator(1)])
+    is_active = models.IntegerField(
+        validators=[
+            MinLengthValidator(0),
+            MaxLengthValidator(1),
+        ],
+    )
     product_caption = models.CharField(max_length=150)
     product_description = models.CharField(max_length=60)
-    product_direction = models.IntegerField(validators=[MinLengthValidator(0), MaxLengthValidator(1)])
+    product_direction = models.IntegerField(
+        validators=[
+            MinLengthValidator(0),
+            MaxLengthValidator(1),
+        ],
+    )
     product_notes = models.CharField(max_length=120, blank=True)
     product_type = models.ForeignKey(
         ProductType,
