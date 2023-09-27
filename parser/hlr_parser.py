@@ -1,11 +1,9 @@
-from pydantic import BaseModel
 from enum import Enum, auto
+from parser.hlr_responses import (InfobipHlrResponse, TmtHlrResponse,
+                                  XconnectHlrResponse, XconnectMnpResponse)
 from typing import Any, Protocol
 
-from parser.hlr_responses import (InfobipHlrResponse,
-                                  TmtHlrResponse,
-                                  XconnectHlrResponse,
-                                  XconnectMnpResponse)
+from pydantic import BaseModel
 
 
 class MsisdnInfo(BaseModel):
