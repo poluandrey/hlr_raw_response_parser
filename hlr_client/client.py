@@ -58,13 +58,13 @@ class HlrClient:
 
                 if hlr_resp.result == -2:
                     raise HlrVendorNotFoundError(
-                        msisdn=hlr_resp.dnis,
+                        msisdn=hlr_resp.msisdn,
                         message=hlr_resp.message,
                         result=hlr_resp.result,
                         message_id=hlr_resp.message_id,
                     )
                 raise HlrProxyInternalError(
-                    msisdn=hlr_resp.dnis,
+                    msisdn=hlr_resp.msisdn,
                     message=hlr_resp.message,
                     result=hlr_resp.result,
                     message_id=hlr_resp.message_id,

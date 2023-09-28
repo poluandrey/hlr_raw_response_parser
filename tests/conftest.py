@@ -1,5 +1,7 @@
 from pytest import fixture
 
+from parser.types import Json
+
 
 @fixture()
 def valid_context_log():
@@ -49,3 +51,27 @@ def xconnect_hlr_context_log():
 @fixture()
 def xconnect_mnp_context_log():
     return '{"startTime":"2023-09-19 11:09:42","contextLog":["s:2023-09-19 11:09:42 d:PT0S t:epollEventLoopGroup-6-20 i:Starting","s:2023-09-19 11:09:42 d:PT0.001S t:HlrExecutor-pool-6-thread-80 i: \\u003d306980165782. prefix\\u003dnull process time sec.\\u003dPT-0.001S mccmnc\\u003dnull fullMatched\\u003dfalse ownerID\\u003dnull providerResponseCode\\u003dnull mode\\u003dEXACTLY","s:2023-09-19 11:09:42 d:PT0.001S t:HlrExecutor-pool-6-thread-80 i: \\u003d306980165782 prefix\\u003dnull process time sec.\\u003dPT0S mccmnc\\u003dnull fullMatched\\u003dfalse ownerID\\u003dnull providerResponseCode\\u003dnull mode\\u003dEXACTLY","s:2023-09-19 11:09:42 d:PT0.001S t:HlrExecutor-pool-6-thread-80 i: \\u003d. prefix\\u003dnull process time sec.\\u003dPT0S mccmnc\\u003dnull fullMatched\\u003dfalse ownerID\\u003dnull providerResponseCode\\u003dnull mode\\u003dEXACTLY","s:2023-09-19 11:09:42 d:PT0.001S t:HlrExecutor-pool-6-thread-80 i:Processing: 306980165782 HLR vendor: xconnect cacheTtl: 86400","s:2023-09-19 11:09:42 d:PT0.001S t:HlrExecutor-pool-6-thread-80 i:Process request, source: xconnect, dnis: 306980165782, cachedRawResponse: {\\"tn\\": \\"306980165782\\", \\"npdi\\": true, \\"npi\\": false, \\"mcc\\": \\"202\\", \\"mnc\\": \\"01\\", \\"cic\\": \\"83000009\\", \\"cn\\": \\"COSMOTE A.E.\\", \\"cc\\": \\"GR\\", \\"nt\\": \\"wireless\\"}","s:2023-09-19 11:09:42 d:PT0.001S t:HlrExecutor-pool-6-thread-80 i:Result is Ok, setCompleted","s:2023-09-19 11:09:42 d:PT0.001S t:HlrExecutor-pool-6-thread-80 i:Finishing"]}'
+
+
+class MockHTTPXResponse:
+
+    def __init__(self, status_code: int, json_data: Json) -> None:
+        self.status_code = status_code
+        self.json_data = json_data
+
+    def json(self) -> Json:
+        return self.json_data
+
+@fixture
+def hlr_response_vendor_not_found():
+    mock_response_data = {
+        "message_id": "befa5ba6-f50b-42ab-9e35-c83557731fd8",
+        "result": -2,
+        "ported": 0,
+        "message": "Vendor not found",
+        "dnis": "7911036721995",
+        "cached": 0,
+        "login": "alaris",
+        "context_log": "..."
+    }
+    return MockHTTPXResponse(200, mock_response_data)
