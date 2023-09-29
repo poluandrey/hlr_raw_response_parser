@@ -1,25 +1,15 @@
-import pytest
-
 from parser.context_log_parser import parse_context_log
-from parser.hlr_parser import TmtHlrHlrParser, InfobipHlrHlrParser, XconnectHlrParser, XconnectMnpParser, create_parser, \
-    HlrParserType, MsisdnInfo
+from parser.hlr_parser import (HlrParserType, InfobipHlrHlrParser, MsisdnInfo,
+                               TmtHlrHlrParser, XconnectHlrParser,
+                               XconnectMnpParser, create_parser)
 
-TMT_CONTEXT_LOG = r'{"startTime":"2023-09-14 09:54:11","contextLog":["s:2023-09-14 09:54:11 d:PT0S t:epollEventLoopGroup-6-11 i:Starting","s:2023-09-14 09:54:11 d:PT0S t:HlrExecutor-pool-6-thread-40 i: \\u003d79226503431. prefix\\u003dnull process time sec.\\u003dPT0S mccmnc\\u003dnull fullMatched\\u003dfalse ownerID\\u003dnull providerResponseCode\\u003dnull mode\\u003dEXACTLY","s:2023-09-14 09:54:11 d:PT0S t:HlrExecutor-pool-6-thread-40 i: \\u003d79226503431 prefix\\u003dnull process time sec.\\u003dPT0S mccmnc\\u003dnull fullMatched\\u003dfalse ownerID\\u003dnull providerResponseCode\\u003dnull mode\\u003dEXACTLY","s:2023-09-14 09:54:11 d:PT0S t:HlrExecutor-pool-6-thread-40 i: \\u003d. prefix\\u003dnull process time sec.\\u003dPT0S mccmnc\\u003dnull fullMatched\\u003dfalse ownerID\\u003dnull providerResponseCode\\u003dnull mode\\u003dEXACTLY","s:2023-09-14 09:54:11 d:PT0S t:HlrExecutor-pool-6-thread-40 i:Processing: 79226503431 HLR vendor: tmtlive cacheTtl: 14400","s:2023-09-14 09:54:11 d:PT0S t:HlrExecutor-pool-6-thread-40 i:Process request, source: tmtlive, dnis: 79226503431, cachedRawResponse: null","s:2023-09-14 09:54:11 d:PT0S t:HlrExecutor-pool-6-thread-40 i:request link1: https://api.tmtvelocity.com/live/json///[dnis]","s:2023-09-14 09:54:11 d:PT0.047S t:AsyncHttpClient-71-49 i:first raw response: {\\n  \\"79226503431\\": {\\n    \\"cic\\": \\"7643\\",\\n    \\"error\\": 191,\\n    \\"imsi\\": \\"25002XXXXXXXXXX\\",\\n    \\"mcc\\": \\"250\\",\\n    \\"mnc\\": \\"02\\",\\n    \\"network\\": \\"MegaFon pjsc\\",\\n    \\"number\\": 79226503431,\\n    \\"ported\\": false,\\n    \\"present\\": \\"na\\",\\n    \\"status\\": 0,\\n    \\"status_message\\": \\"Success\\",\\n    \\"type\\": \\"mobile\\",\\n    \\"trxid\\": \\"tp02NAX\\"\\n  }\\n}","s:2023-09-14 09:54:11 d:PT0.047S t:AsyncHttpClient-71-49 i:Caching raw response with cacheTtl: 14405","s:2023-09-14 09:54:11 d:PT0.047S t:AsyncHttpClient-71-49 i:Result is Ok, setCompleted","s:2023-09-14 09:54:11 d:PT0.048S t:AsyncHttpClient-71-49 i:Finishing"]}'
-INFOBIP_CONTEXT_LOG = r'{"startTime":"2023-09-19 11:40:25","contextLog":["s:2023-09-19 11:40:25 d:PT0S t:epollEventLoopGroup-6-20 i:Starting","s:2023-09-19 11:40:25 d:PT0.001S t:HlrExecutor-pool-6-thread-102 i: \\u003d306980165782. prefix\\u003dnull process time sec.\\u003dPT0S mccmnc\\u003dnull fullMatched\\u003dfalse ownerID\\u003dnull providerResponseCode\\u003dnull mode\\u003dEXACTLY","s:2023-09-19 11:40:25 d:PT0.001S t:HlrExecutor-pool-6-thread-102 i: \\u003d306980165782 prefix\\u003dnull process time sec.\\u003dPT0S mccmnc\\u003dnull fullMatched\\u003dfalse ownerID\\u003dnull providerResponseCode\\u003dnull mode\\u003dEXACTLY","s:2023-09-19 11:40:25 d:PT0.001S t:HlrExecutor-pool-6-thread-102 i: \\u003d. prefix\\u003dnull process time sec.\\u003dPT0S mccmnc\\u003dnull fullMatched\\u003dfalse ownerID\\u003dnull providerResponseCode\\u003dnull mode\\u003dEXACTLY","s:2023-09-19 11:40:25 d:PT0.001S t:HlrExecutor-pool-6-thread-102 i:Processing: 306980165782 HLR vendor: infobip cacheTtl: 14400","s:2023-09-19 11:40:25 d:PT0.001S t:HlrExecutor-pool-6-thread-102 i:Process request, source: infobip, dnis: 306980165782, cachedRawResponse: {\\"results\\":[{\\"to\\":\\"306980165782\\",\\"mccMnc\\":\\"20201\\",\\"imsi\\":\\"202010000000000\\",\\"originalNetwork\\":{\\"networkName\\":\\"Cosmote (Mobile Telecommunications S.A.)\\",\\"networkPrefix\\":\\"6980165\\",\\"countryName\\":\\"Greece\\",\\"countryPrefix\\":\\"30\\",\\"networkId\\":1560},\\"ported\\":false,\\"roaming\\":false,\\"status\\":{\\"groupId\\":3,\\"groupName\\":\\"DELIVERED\\",\\"id\\":5,\\"name\\":\\"DELIVERED_TO_HANDSET\\",\\"description\\":\\"Message delivered to handset\\"},\\"error\\":{\\"groupId\\":0,\\"groupName\\":\\"OK\\",\\"id\\":0,\\"name\\":\\"NO_ERROR\\",\\"description\\":\\"No Error\\",\\"permanent\\":false}}]}","s:2023-09-19 11:40:25 d:PT0.002S t:HlrExecutor-pool-6-thread-102 i:Result is Ok, setCompleted","s:2023-09-19 11:40:25 d:PT0.002S t:HlrExecutor-pool-6-thread-102 i:Finishing"]}'
-XCONNECT_HLR_CONTEXT_LOG = r'{"startTime":"2023-09-15 09:51:01","contextLog":["s:2023-09-15 09:51:01 d:PT0S t:epollEventLoopGroup-6-11 i:Starting","s:2023-09-15 09:51:01 d:PT0S t:HlrExecutor-pool-6-thread-29 i: \\u003d79216503431. prefix\\u003dnull process time sec.\\u003dPT0S mccmnc\\u003dnull fullMatched\\u003dfalse ownerID\\u003dnull providerResponseCode\\u003dnull mode\\u003dEXACTLY","s:2023-09-15 09:51:01 d:PT0S t:HlrExecutor-pool-6-thread-29 i: \\u003d79216503431 prefix\\u003d79216503431 process time sec.\\u003dPT0S mccmnc\\u003d250001 fullMatched\\u003dtrue ownerID\\u003dmMTS providerResponseCode\\u003dnull mode\\u003dEXACTLY","s:2023-09-15 09:51:01 d:PT0S t:HlrExecutor-pool-6-thread-29 i: \\u003d. prefix\\u003dnull process time sec.\\u003dPT0S mccmnc\\u003dnull fullMatched\\u003dfalse ownerID\\u003dnull providerResponseCode\\u003dnull mode\\u003dEXACTLY","s:2023-09-15 09:51:01 d:PT0S t:HlrExecutor-pool-6-thread-29 i:Processing: 79216503431 HLR vendor: xconnect cacheTtl: 3600","s:2023-09-15 09:51:01 d:PT0.001S t:HlrExecutor-pool-6-thread-29 i:Process request, source: xconnect, dnis: 79216503431, cachedRawResponse: null","s:2023-09-15 09:51:02 d:PT0.985S t:HlrExecutor-pool-6-thread-29 i:first raw response: {\\"tn\\": \\"79216503431\\", \\"cc\\": \\"RU\\", \\"mcc\\": \\"250\\", \\"mnc\\": \\"01\\", \\"npdi\\": true, \\"npi\\": true, \\"nt\\": \\"wireless\\", \\"nv\\": \\"000\\", \\"ns\\": \\"000\\", \\"rc\\": \\"000\\"}","s:2023-09-15 09:51:02 d:PT0.985S t:HlrExecutor-pool-6-thread-29 i:Caching raw response with cacheTtl: 3605","s:2023-09-15 09:51:02 d:PT0.985S t:HlrExecutor-pool-6-thread-29 i:Result is Ok, setCompleted","s:2023-09-15 09:51:02 d:PT0.986S t:HlrExecutor-pool-6-thread-29 i:Finishing"]}'
-XCONNECT_MNP_CONTEXT_LOG = r'{"startTime":"2023-09-19 11:09:42","contextLog":["s:2023-09-19 11:09:42 d:PT0S t:epollEventLoopGroup-6-20 i:Starting","s:2023-09-19 11:09:42 d:PT0.001S t:HlrExecutor-pool-6-thread-80 i: \\u003d306980165782. prefix\\u003dnull process time sec.\\u003dPT-0.001S mccmnc\\u003dnull fullMatched\\u003dfalse ownerID\\u003dnull providerResponseCode\\u003dnull mode\\u003dEXACTLY","s:2023-09-19 11:09:42 d:PT0.001S t:HlrExecutor-pool-6-thread-80 i: \\u003d306980165782 prefix\\u003dnull process time sec.\\u003dPT0S mccmnc\\u003dnull fullMatched\\u003dfalse ownerID\\u003dnull providerResponseCode\\u003dnull mode\\u003dEXACTLY","s:2023-09-19 11:09:42 d:PT0.001S t:HlrExecutor-pool-6-thread-80 i: \\u003d. prefix\\u003dnull process time sec.\\u003dPT0S mccmnc\\u003dnull fullMatched\\u003dfalse ownerID\\u003dnull providerResponseCode\\u003dnull mode\\u003dEXACTLY","s:2023-09-19 11:09:42 d:PT0.001S t:HlrExecutor-pool-6-thread-80 i:Processing: 306980165782 HLR vendor: xconnect cacheTtl: 86400","s:2023-09-19 11:09:42 d:PT0.001S t:HlrExecutor-pool-6-thread-80 i:Process request, source: xconnect, dnis: 306980165782, cachedRawResponse: {\\"tn\\": \\"306980165782\\", \\"npdi\\": true, \\"npi\\": false, \\"mcc\\": \\"202\\", \\"mnc\\": \\"01\\", \\"cic\\": \\"83000009\\", \\"cn\\": \\"COSMOTE A.E.\\", \\"cc\\": \\"GR\\", \\"nt\\": \\"wireless\\"}","s:2023-09-19 11:09:42 d:PT0.001S t:HlrExecutor-pool-6-thread-80 i:Result is Ok, setCompleted","s:2023-09-19 11:09:42 d:PT0.001S t:HlrExecutor-pool-6-thread-80 i:Finishing"]}'
+import pytest
 
 HLR_PARSERS = [
     (HlrParserType.XCONNECT_HLR, XconnectHlrParser),
     (HlrParserType.XCONNECT_MNP, XconnectMnpParser),
     (HlrParserType.INFOBIP_HLR, InfobipHlrHlrParser),
     (HlrParserType.TMT_HLR, TmtHlrHlrParser),
-]
-HLR_PROVIDERS_RESULTS = [
-    (HlrParserType.TMT_HLR, TMT_CONTEXT_LOG),
-    (HlrParserType.INFOBIP_HLR, INFOBIP_CONTEXT_LOG),
-    (HlrParserType.XCONNECT_HLR, XCONNECT_HLR_CONTEXT_LOG),
-    (HlrParserType.XCONNECT_MNP, XCONNECT_MNP_CONTEXT_LOG),
 ]
 
 
@@ -28,9 +18,29 @@ def test__create_parser__return_correct_parser_depends_on_passed_provider_type(p
     assert isinstance(create_parser(provider_type), parser)
 
 
-@pytest.mark.parametrize('provider_type,context_log', HLR_PROVIDERS_RESULTS)
-def test__get_msisdn_info__for_each_parser_type_return_MsisdnInfo_instance(provider_type, context_log):
-    raw_response = parse_context_log(context_log)
-    parser = create_parser(provider_type)
+def test__get_msisdn_info__for_tmt_parser_return_MsisdnInfo_instance(tmt_context_log):
+    raw_response = parse_context_log(tmt_context_log)
+    parser = create_parser(HlrParserType.TMT_HLR)
+
+    assert isinstance(parser.get_msisdn_info(raw_response), MsisdnInfo)
+
+
+def test__get_msisdn_info__for_infobip_parser_return_MsisdnInfo_instance(infobip_context_log):
+    raw_response = parse_context_log(infobip_context_log)
+    parser = create_parser(HlrParserType.INFOBIP_HLR)
+
+    assert isinstance(parser.get_msisdn_info(raw_response), MsisdnInfo)
+
+
+def test__get_msisdn_info__for_xconnect_hlr_parser_return_MsisdnInfo_instance(xconnect_hlr_context_log):
+    raw_response = parse_context_log(xconnect_hlr_context_log)
+    parser = create_parser(HlrParserType.XCONNECT_HLR)
+
+    assert isinstance(parser.get_msisdn_info(raw_response), MsisdnInfo)
+
+
+def test__get_msisdn_info__for_xconnect_mnp_parser_return_MsisdnInfo_instance(xconnect_mnp_context_log):
+    raw_response = parse_context_log(xconnect_mnp_context_log)
+    parser = create_parser(HlrParserType.XCONNECT_MNP)
 
     assert isinstance(parser.get_msisdn_info(raw_response), MsisdnInfo)

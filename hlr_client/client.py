@@ -1,129 +1,78 @@
 import dataclasses
-import os
-from typing import Any
-from urllib.parse import urljoin
 
-import requests
-from dotenv import load_dotenv
+import httpx
+from pydantic import BaseModel, Field
 
-load_dotenv()
-
-HLR_SERVICE_URL = os.getenv('HLR_SERVICE_BASE_URL')
-HLR_SERVICE_LOGIN = os.getenv('HLR_SERVICE_LOGIN')
-HLR_SERVICE_PASSWORD = os.getenv('HLR_SERVICE_PASSWORD')
-
-if not all([HLR_SERVICE_URL, HLR_SERVICE_PASSWORD, HLR_SERVICE_LOGIN]):
-    raise OSError('Not all environment variables specify')
+from hlr_client.errors import (HlrClientHTTPError, HlrClientInternalError,
+                               HlrProxyInternalError, HlrVendorNotFoundError)
 
 
-@dataclasses.dataclass(kw_only=True, slots=True, frozen=True)
-class HlrSuccessfulResponse:
+class HlrSuccessfulResponse(BaseModel):
     message_id: str
-    msisdn: str
-    provider: str | None
-    mccmnc: str | None
+    msisdn: str = Field(alias='dnis')
+    source_name: str | None = None
+    mccmnc: str | None = None
     result: int
-    ported: int | None
-    cached: int | None
-    context_log: str | None
+    ported: int | None = None
+    cached: int | None = None
+    context_log: str | None = None
+    message: str | None = None
 
 
 @dataclasses.dataclass(kw_only=True, slots=True, frozen=True)
 class HlrFailedResponse:
-    msisdn: str
-    provider: str
-    http_error_code: int
+    msisdn: str = Field(alias='dnis')
+    result: int | None = None
+    message_id: str | None = None
+    message: str
+    provider: str | None = None
+    http_error: int | None = None
 
 
-@dataclasses.dataclass(kw_only=True, slots=True, frozen=True)
-class Task:
-    providers: list[str]
-    msisdns: list[str]
+class HlrClient:
 
-
-class HlrApiClient:
-
-    def __init__(self):
-        self.payload = {
-            'login': HLR_SERVICE_LOGIN,
-            'password': HLR_SERVICE_PASSWORD,
-            'debug': 1,
+    def __init__(self, login: str, password: str, base_url: str) -> None:
+        self.request_params: dict[str, str] = {
+            'login': login,
+            'password': password,
+            'debug': '1',
         }
+        self.session = httpx.Client(
+            base_url=base_url,
+            params=self.request_params,
+        )
 
-    def send_mccmnc_request(
+    def get_mccmnc_info(
             self,
             provider: str,
             msisdn: str,
-            session: requests.Session,
-    ) -> dict[str, Any]:
-        url = urljoin(HLR_SERVICE_URL, 'hlr/mccmnc_request')
-        payload = {'dnis': msisdn, 'source_name': provider, **self.payload}
-        with session as s:
-            resp = s.get(url, params=payload)
-            resp.raise_for_status()
-
-        return resp.json()
-
-
-class HlrSuccessfulResponseParser:
-
-    def parse_response(self, resp: dict[str, Any]) -> HlrSuccessfulResponse:
+    ) -> HlrSuccessfulResponse:
+        params = {'dnis': msisdn, 'source_name': provider}
         try:
-            message_id = resp['message_id']
-            msisdn = resp['dnis']
-            source_name = resp.get('source_name')
-            mccmnc = resp.get('mccmnc')
-            result = resp['result']
-            ported = resp.get('ported')
-            cached = resp.get('ported')
-            context_log = resp.get('context_log')
+            with self.session as s:
+                resp = s.get('mccmnc_request', params=params)
+                resp.raise_for_status()
+                hlr_resp = HlrSuccessfulResponse(**resp.json())
+                if hlr_resp.result == 0:
+                    return hlr_resp
 
-            return HlrSuccessfulResponse(
-                message_id=message_id,
-                mccmnc=mccmnc,
-                msisdn=msisdn,
-                provider=source_name,
-                result=result,
-                ported=ported,
-                cached=cached,
-                context_log=context_log,
-            )
-        except KeyError as error:
-            raise error
-
-
-class TaskHandler:
-
-    def __init__(self, task: Task):
-        self.task = task
-        self.session = requests.Session()
-
-    def handle_task(self) -> list[HlrSuccessfulResponse | HlrFailedResponse]:
-        task_results: list[HlrSuccessfulResponse | HlrFailedResponse] = []
-        api_client = HlrApiClient()
-        params = (
-            (msisdn, provider) for msisdn in self.task.msisdns
-            for provider in self.task.providers
-        )
-        for msisdn, provider in params:
-            try:
-                resp = api_client.send_mccmnc_request(
-                    msisdn=msisdn,
-                    provider=provider,
-                    session=self.session,
+                if hlr_resp.result == -2:
+                    raise HlrVendorNotFoundError(
+                        msisdn=hlr_resp.msisdn,
+                        message=hlr_resp.message,
+                        result=hlr_resp.result,
+                        message_id=hlr_resp.message_id,
+                    )
+                raise HlrProxyInternalError(
+                    msisdn=hlr_resp.msisdn,
+                    message=hlr_resp.message,
+                    result=hlr_resp.result,
+                    message_id=hlr_resp.message_id,
                 )
-                task_results.append(
-                    HlrSuccessfulResponseParser().parse_response(
-                        resp=resp,
-                    ),
-                )
-            except requests.HTTPError as error:
-                task_results.append(
-                    HlrFailedResponse(
-                        msisdn=msisdn,
-                        provider=provider,
-                        http_error_code=error.response.status_code,
-                    ),
-                )
-
-        return task_results
+        except httpx.HTTPStatusError as error:
+            raise HlrClientHTTPError(
+                error_code=error.response.status_code,
+            ) from error
+        except httpx.HTTPError as error:
+            # тут наверное должна логироваться ошибка
+            raise HlrClientInternalError from error
