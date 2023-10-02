@@ -1,7 +1,7 @@
-from parser.context_log_parser import parse_context_log
-from parser.hlr_parser import (HlrParserType, InfobipHlrHlrParser, MsisdnInfo,
-                               TmtHlrHlrParser, XconnectHlrParser,
-                               XconnectMnpParser, create_parser)
+from hlr.parser.context_log_parser import parse_context_log
+from hlr.parser.hlr_parser import (HlrParserType, InfobipHlrHlrParser, MsisdnInfo,
+                                   TmtHlrHlrParser, XconnectHlrParser,
+                                   XconnectMnpParser, create_parser)
 
 import pytest
 
@@ -39,7 +39,7 @@ def test__get_msisdn_info__for_xconnect_hlr_parser_return_MsisdnInfo_instance(xc
     assert isinstance(parser.get_msisdn_info(raw_response), MsisdnInfo)
 
 
-def test__get_msisdn_info__for_xconnect_mnp_parser_return_MsisdnInfo_instance(xconnect_mnp_context_log):
+def test__get_msisdn_info__for_xconnect_mnp_parser_return_msisdninfo_instance(xconnect_mnp_context_log):
     raw_response = parse_context_log(xconnect_mnp_context_log)
     parser = create_parser(HlrParserType.XCONNECT_MNP)
 

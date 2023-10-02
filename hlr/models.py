@@ -17,12 +17,12 @@ class Task(models.Model):
     last_update_time = models.DateTimeField(auto_now=True)
 
     @transition(field=status, source='new', target='in progress')
-    def in_progress(self):
+    def in_progress(self) -> None:
         pass
 
     @transition(field=status, source='in progress', target='ready')
-    def ready(self):
+    def ready(self) -> None:
         pass
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'task id {self.pk} <{self.author.username}>'
