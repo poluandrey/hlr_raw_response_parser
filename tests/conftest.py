@@ -1,6 +1,6 @@
 from pytest import fixture
 
-from hlr.client import HlrClient
+from hlr.client import HlrClient, HlrResponse
 from hlr.parser.hlr_parser import HlrParserType
 from hlr.tasks import Task
 
@@ -141,3 +141,9 @@ def hlr_task():
 def hlr_task_for_few_number():
     task = Task(providers=['any_provider'], msisdns=['79999999999', '79999999998'])
     return task
+
+
+@fixture()
+def hlr_response_successful(hlr_response_successful_for_tmt_hlr):
+    hlr_response = HlrResponse(**hlr_response_successful_for_tmt_hlr)
+    return hlr_response
