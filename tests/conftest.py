@@ -2,6 +2,7 @@ from pytest import fixture
 
 from hlr.client import HlrClient
 from hlr.parser.hlr_parser import HlrParserType
+from hlr.tasks import Task
 
 
 @fixture()
@@ -122,3 +123,21 @@ def hlr_response_hlr_proxy_internal_error_contain_error():
         "provider_ttl": 86400
     }
     return mock_response_data
+
+
+@fixture()
+def hlr_task_empty():
+    task = Task(providers=[], msisdns=[])
+    return task
+
+
+@fixture()
+def hlr_task():
+    task = Task(providers=['any_provider'], msisdns=['79999999999'])
+    return task
+
+
+@fixture()
+def hlr_task_for_few_number():
+    task = Task(providers=['any_provider'], msisdns=['79999999999', '79999999998'])
+    return task
