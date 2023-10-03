@@ -7,8 +7,8 @@ from hlr.client_errors import HlrVendorNotFoundError, HlrProxyInternalError, Hlr
 
 def test__hlr_client_get_mccmnc_info__raise_error_when_vendor_not_found(hlr_client,
                                                                         hlr_response_vendor_not_found):
-    provider = "provider_name"
-    msisdn = "7911036721995"
+    provider = 'provider_name'
+    msisdn = '7911036721995'
 
     with respx.mock:
         respx.get('https://example.com/api/mccmnc_request').respond(json=hlr_response_vendor_not_found, status_code=200)
@@ -19,8 +19,8 @@ def test__hlr_client_get_mccmnc_info__raise_error_when_vendor_not_found(hlr_clie
 
 def test__hlr_client_get_mccmnc_info__hlr_vendor_not_found_error_contain_additional_info(hlr_client,
                                                                                          hlr_response_vendor_not_found):
-    provider = "provider_name"
-    msisdn = "7911036721995"
+    provider = 'provider_name'
+    msisdn = '7911036721995'
 
     with respx.mock:
         respx.get('https://example.com/api/mccmnc_request').respond(json=hlr_response_vendor_not_found, status_code=200)
@@ -35,8 +35,8 @@ def test__hlr_client_get_mccmnc_info__hlr_vendor_not_found_error_contain_additio
 
 def test__hlr_client_get_mccmnc_info__return_hlr_response_instance(hlr_client,
                                                                    hlr_response_successful_for_tmt_hlr):
-    provider = "provider_name"
-    msisdn = "7911036721995"
+    provider = 'provider_name'
+    msisdn = '7911036721995'
 
     with respx.mock:
         respx.get('https://example.com/api/mccmnc_request').respond(json=hlr_response_successful_for_tmt_hlr,
@@ -48,8 +48,8 @@ def test__hlr_client_get_mccmnc_info__return_hlr_response_instance(hlr_client,
 
 def test__hlr_client_get_mccmnc_info__hlr_response_contain_required_data(hlr_client,
                                                                          hlr_response_successful_for_tmt_hlr):
-    provider = "provider_name"
-    msisdn = "7911036721995"
+    provider = 'provider_name'
+    msisdn = '7911036721995'
 
     with respx.mock:
         respx.get('https://example.com/api/mccmnc_request').respond(json=hlr_response_successful_for_tmt_hlr,
@@ -64,13 +64,15 @@ def test__hlr_client_get_mccmnc_info__hlr_response_contain_required_data(hlr_cli
         assert hlr_response.source_name == 'tmt_hlr'
         assert hlr_response.cached == 0
         assert hlr_response.mccmnc == '250001'
-        assert hlr_response.context_log == "{\"startTime\":\"2023-10-02 10:33:37\",\"contextLog\":[\"s:2023-10-02 10:33:37 d:PT0S t:epollEventLoopGroup-6-20 i:Starting\",\"s:2023-10-02 10:33:37 d:PT0S t:HlrExecutor-pool-6-thread-84 i: \=79216503431. prefix\=null process time sec.\=PT0S mccmnc\=null fullMatched\=false ownerID\=null providerResponseCode\=null mode\=EXACTLY\",\"s:2023-10-02 10:33:37 d:PT0.001S t:HlrExecutor-pool-6-thread-84 i: \=79216503431 prefix\=null process time sec.\=PT-0.001S mccmnc\=null fullMatched\=false ownerID\=null providerResponseCode\=null mode\=EXACTLY\",\"s:2023-10-02 10:33:37 d:PT0.001S t:HlrExecutor-pool-6-thread-84 i: \=. prefix\=null process time sec.\=PT0S mccmnc\=null fullMatched\=false ownerID\=null providerResponseCode\=null mode\=EXACTLY\",\"s:2023-10-02 10:33:37 d:PT0.001S t:HlrExecutor-pool-6-thread-84 i:Processing: 79216503431 HLR vendor: tmtlive cacheTtl: 14400\",\"s:2023-10-02 10:33:37 d:PT0.001S t:HlrExecutor-pool-6-thread-84 i:Process request, source: tmtlive, dnis: 79216503431, cachedRawResponse: null\",\"s:2023-10-02 10:33:37 d:PT0.001S t:HlrExecutor-pool-6-thread-84 i:request link1: https://api.tmtvelocity.com/live/json/ZspUQp2a4xYX7/Z7K4xEX5YwGD7v7/[dnis]\",\"s:2023-10-02 10:33:37 d:PT0.018S t:AsyncHttpClient-43-9 i:first raw response: {\\n  \\\"79216503431\\\": {\\n    \\\"cic\\\": \\\"7629\\\",\\n    \\\"error\\\": 191,\\n    \\\"imsi\\\": \\\"25001XXXXXXXXXX\\\",\\n    \\\"mcc\\\": \\\"250\\\",\\n    \\\"mnc\\\": \\\"01\\\",\\n    \\\"network\\\": \\\"Mobilnyye TeleSistemy pjsc (MTS)\\\",\\n    \\\"number\\\": 79216503431,\\n    \\\"ported\\\": true,\\n    \\\"present\\\": \\\"na\\\",\\n    \\\"status\\\": 0,\\n    \\\"status_message\\\": \\\"Success\\\",\\n    \\\"type\\\": \\\"mobile\\\",\\n    \\\"trxid\\\": \\\"EfwonAB\\\"\\n  }\\n}\",\"s:2023-10-02 10:33:37 d:PT0.018S t:AsyncHttpClient-43-9 i:Caching raw response with cacheTtl: 14405\",\"s:2023-10-02 10:33:37 d:PT0.018S t:AsyncHttpClient-43-9 i:Result is Ok, setCompleted\",\"s:2023-10-02 10:33:37 d:PT0.018S t:AsyncHttpClient-43-9 i:Finishing\"]}"
+        assert hlr_response.context_log == '{\"startTime\":\"2023-10-02 10:33:37\",\"contextLog\":[\"s:2023-10-02 10:33:37 d:PT0S t:epollEventLoopGroup-6-20 i:Starting\",\"s:2023-10-02 10:33:37 d:PT0S t:HlrExecutor-pool-6-thread-84 i: \=79216503431. prefix\=null process time sec.\=PT0S mccmnc\=null fullMatched\=false ownerID\=null providerResponseCode\=null mode\=EXACTLY\",\"s:2023-10-02 10:33:37 d:PT0.001S t:HlrExecutor-pool-6-thread-84 i: \=79216503431 prefix\=null process time sec.\=PT-0.001S mccmnc\=null fullMatched\=false ownerID\=null providerResponseCode\=null mode\=EXACTLY\",\"s:2023-10-02 10:33:37 d:PT0.001S t:HlrExecutor-pool-6-thread-84 i: \=. prefix\=null process time sec.\=PT0S mccmnc\=null fullMatched\=false ownerID\=null providerResponseCode\=null mode\=EXACTLY\",\"s:2023-10-02 10:33:37 d:PT0.001S t:HlrExecutor-pool-6-thread-84 i:Processing: 79216503431 HLR vendor: tmtlive cacheTtl: 14400\",\"s:2023-10-02 10:33:37 d:PT0.001S t:HlrExecutor-pool-6-thread-84 i:Process request, source: tmtlive, dnis: 79216503431, cachedRawResponse: null\",\"s:2023-10-02 10:33:37 d:PT0.001S t:HlrExecutor-pool-6-thread-84 i:request link1: https://api.tmtvelocity.com/live/json/ZspUQp2a4xYX7/Z7K4xEX5YwGD7v7/[dnis]\",\"s:2023-10-02 10:33:37 d:PT0.018S t:AsyncHttpClient-43-9 i:first raw response: {\\n  \\\"79216503431\\\": {\\n    \\\"cic\\\": \\\"7629\\\",\\n    \\\"error\\\": 191,\\n    \\\"imsi\\\": \\\"25001XXXXXXXXXX\\\",\\n    \\\"mcc\\\": \\\"250\\\",\\n    \\\"mnc\\\": \\\"01\\\",\\n    \\\"network\\\": \\\"Mobilnyye TeleSistemy pjsc (MTS)\\\",\\n    \\\"number\\\": 79216503431,\\n    \\\"ported\\\": true,\\n    \\\"present\\\": \\\"na\\\",\\n    \\\"status\\\": 0,\\n    \\\"status_message\\\": \\\"Success\\\",\\n    \\\"type\\\": \\\"mobile\\\",\\n    \\\"trxid\\\": \\\"EfwonAB\\\"\\n  }\\n}\",\"s:2023-10-02 10:33:37 d:PT0.018S t:AsyncHttpClient-43-9 i:Caching raw response with cacheTtl: 14405\",\"s:2023-10-02 10:33:37 d:PT0.018S t:AsyncHttpClient-43-9 i:Result is Ok, setCompleted\",\"s:2023-10-02 10:33:37 d:PT0.018S t:AsyncHttpClient-43-9 i:Finishing\"]}'
 
 
-def test__hlr_client_get_mccmnc_info__raise_internal_hlr_proxy_error(hlr_client,
-                                                                     hlr_response_hlr_proxy_internal_error_contain_error):
-    provider = "provider_name"
-    msisdn = "7911036721995"
+def test__hlr_client_get_mccmnc_info__raise_internal_hlr_proxy_error(
+        hlr_client,
+        hlr_response_hlr_proxy_internal_error_contain_error,
+):
+    provider = 'provider_name'
+    msisdn = '7911036721995'
 
     with respx.mock:
         respx.get('https://example.com/api/mccmnc_request').respond(json=hlr_response_hlr_proxy_internal_error_contain_error,
@@ -80,10 +82,12 @@ def test__hlr_client_get_mccmnc_info__raise_internal_hlr_proxy_error(hlr_client,
             hlr_client.get_mccmnc_info(provider=provider, msisdn=msisdn)
 
 
-def test__hlr_client_get_mccmnc_info__internal_hlr_proxy_error_contain_required_data_when_message_provided_in_response(hlr_client,
-                                                                                     hlr_response_hlr_proxy_internal_error_contain_message):
-    provider = "provider_name"
-    msisdn = "7911036721995"
+def test__hlr_client_get_mccmnc_info__internal_hlr_proxy_error_contain_required_data_when_message_provided_in_response(
+        hlr_client,
+        hlr_response_hlr_proxy_internal_error_contain_message,
+):
+    provider = 'provider_name'
+    msisdn = '7911036721995'
 
     with respx.mock:
         respx.get('https://example.com/api/mccmnc_request').respond(json=hlr_response_hlr_proxy_internal_error_contain_message,
@@ -97,10 +101,12 @@ def test__hlr_client_get_mccmnc_info__internal_hlr_proxy_error_contain_required_
             assert error.result == -1
 
 
-def test__hlr_client_get_mccmnc_info__internal_hlr_proxy_error_contain_required_data_when_error_provided_in_response(hlr_client,
-                                                                                     hlr_response_hlr_proxy_internal_error_contain_error):
-    provider = "provider_name"
-    msisdn = "7911036721995"
+def test__hlr_client_get_mccmnc_info__internal_hlr_proxy_error_contain_required_data_when_error_provided_in_response(
+        hlr_client,
+        hlr_response_hlr_proxy_internal_error_contain_error,
+):
+    provider = 'provider_name'
+    msisdn = '7911036721995'
 
     with respx.mock:
         respx.get('https://example.com/api/mccmnc_request').respond(json=hlr_response_hlr_proxy_internal_error_contain_error,

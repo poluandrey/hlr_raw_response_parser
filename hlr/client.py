@@ -63,6 +63,7 @@ class HlrClient:
                         result=hlr_resp_result,
                         message_id=hlr_resp['message_id'],
                     )
+
                 message = hlr_resp.get('message')
                 if not message:
                     message = hlr_resp.get('error')
