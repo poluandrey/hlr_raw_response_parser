@@ -1,7 +1,7 @@
 from unittest import mock
 
 from hlr.client_errors import HlrVendorNotFoundError
-from hlr.tasks import handle_task, handle_client_error
+from hlr.tasks import handle_task
 
 
 def test__handle_task__task_with_empty_fields(hlr_task_empty, hlr_client):
@@ -24,7 +24,7 @@ def test__handle_task__valid_client_response_was_append_correctly(
 
 def test__handle_task__invalid_client_response_was_append_correctly(
         hlr_client,
-        hlr_task
+        hlr_task,
 ):
     with mock.patch('hlr.client.HlrClient.get_mccmnc_info') as get_mccmnc_info_mock:
         get_mccmnc_info_mock.side_effect = HlrVendorNotFoundError(result=-2, message='test', message_id='test')
@@ -41,8 +41,8 @@ def test__handle_task__valid_and_invalid_client_response_handle_correctly(hlr_cl
     with mock.patch('hlr.client.HlrClient.get_mccmnc_info') as get_mccmnc_info_mock:
         get_mccmnc_info_mock.side_effect = [hlr_response_successful, HlrVendorNotFoundError(result=-2,
                                                                                             message='test',
-                                                                                            message_id='test'
-                                                                                            )
+                                                                                            message_id='test',
+                                                                                            ),
                                             ]
         task_result = handle_task(hlr_client=hlr_client, task=hlr_task_for_few_number)
         successfuls, failds = task_result
