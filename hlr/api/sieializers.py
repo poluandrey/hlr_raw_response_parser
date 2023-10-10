@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
-from hlr.models import Task, TaskDetail
 from alaris.models import Product
+from hlr.models import Task, TaskDetail
 
 
 class TaskRetrieveSerializer(serializers.ModelSerializer[Task]):

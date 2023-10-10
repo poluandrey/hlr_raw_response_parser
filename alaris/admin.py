@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from alaris.models import Product, ProductType, Carrier
+from alaris.models import Carrier, Product, ProductType
 
 
 @admin.register(Product)

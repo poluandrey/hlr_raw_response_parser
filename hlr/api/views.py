@@ -1,13 +1,12 @@
 from rest_framework.decorators import action
-from rest_framework.mixins import (CreateModelMixin,
-                                   ListModelMixin,
-                                   RetrieveModelMixin,
-                                   )
-from rest_framework.viewsets import GenericViewSet, ReadOnlyModelViewSet
+from rest_framework.mixins import (CreateModelMixin, ListModelMixin,
+                                   RetrieveModelMixin)
 from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet, ReadOnlyModelViewSet
 
+from hlr.api.sieializers import (TaskCreateSerializer, TaskDetailSerializer,
+                                 TaskRetrieveSerializer)
 from hlr.models import Task, TaskDetail
-from hlr.api.sieializers import TaskRetrieveSerializer, TaskCreateSerializer, TaskDetailSerializer
 
 
 class TaskView(GenericViewSet, CreateModelMixin, ListModelMixin, RetrieveModelMixin):

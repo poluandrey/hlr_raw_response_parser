@@ -1,9 +1,10 @@
-from hlr.parser.context_log_parser import (get_nested_context_log,
-                                           serialize_context_log, extruct_raw_response)
+import pytest
+
+from hlr.parser.context_log_parser import (extruct_raw_response,
+                                           get_nested_context_log,
+                                           serialize_context_log)
 from hlr.parser.errors import (ContextLogNotFoundError, InvalidContextLogError,
                                RawResponseNotFoundError)
-
-import pytest
 
 
 def test__serialize_context_log__raise_error_when_empty_context_log_provided():

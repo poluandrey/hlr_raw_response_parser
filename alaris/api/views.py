@@ -1,10 +1,10 @@
-from rest_framework.viewsets import ReadOnlyModelViewSet
+from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema
+from rest_framework.viewsets import ReadOnlyModelViewSet
 
-from alaris.models import Product
 from alaris.api.serializers import ProductSerializer
+from alaris.models import Product
 
 
 class ProductView(ReadOnlyModelViewSet):

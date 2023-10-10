@@ -1,7 +1,8 @@
 from django.contrib.auth import get_user_model
-from django.db import models
-from django.core.validators import MaxValueValidator, MinValueValidator, ValidationError
 from django.contrib.postgres.fields import ArrayField
+from django.core.validators import (MaxValueValidator, MinValueValidator,
+                                    ValidationError)
+from django.db import models
 from django_fsm import FSMField, transition
 
 from alaris.models import Product

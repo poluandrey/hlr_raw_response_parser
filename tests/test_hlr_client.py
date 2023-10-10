@@ -2,7 +2,8 @@ import pytest
 import respx
 
 from hlr.client import HlrResponse
-from hlr.client_errors import HlrVendorNotFoundError, HlrProxyInternalError, HlrClientHTTPError
+from hlr.client_errors import (HlrClientHTTPError, HlrProxyInternalError,
+                               HlrVendorNotFoundError)
 
 
 def test__hlr_client_get_mccmnc_info__raise_error_when_vendor_not_found(hlr_client,
