@@ -2,6 +2,7 @@ from rest_framework.serializers import ModelSerializer
 
 from alaris.models import Product
 
+
 class ProductSerializer(ModelSerializer):
 
     class Meta:
