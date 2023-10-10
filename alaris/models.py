@@ -29,7 +29,7 @@ class Carrier(models.Model):
 
 
 class Product(models.Model):
-    alaris_product_id = models.PositiveIntegerField()
+    alaris_product_id = models.PositiveIntegerField(unique=True)
     acc_currency_code = models.CharField(max_length=10)
     alaris_acc_id = models.PositiveIntegerField()
     carrier = models.ForeignKey(
