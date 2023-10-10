@@ -5,7 +5,6 @@ from rest_framework.mixins import (CreateModelMixin,
                                    )
 from rest_framework.viewsets import GenericViewSet, ReadOnlyModelViewSet
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema
 
 from hlr.models import Task, TaskDetail
 from hlr.api.sieializers import TaskRetrieveSerializer, TaskCreateSerializer, TaskDetailSerializer

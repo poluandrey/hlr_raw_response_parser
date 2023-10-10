@@ -3,7 +3,6 @@ from django.contrib import admin
 from hlr.models import Task, TaskDetail
 
 
-
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
     list_display = [
@@ -31,4 +30,3 @@ class TaskDetailAdmin(admin.ModelAdmin):
         'message',
         'http_error_code',
     ]
-

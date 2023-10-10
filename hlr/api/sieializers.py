@@ -11,7 +11,9 @@ class TaskRetrieveSerializer(serializers.ModelSerializer[Task]):
     hlr_provider = serializers.SerializerMethodField()
 
     def get_hlr_provider(self, obj: Task):
-        return Product.objects.filter(alaris_product_id__in=obj.alaris_product_id).values_list('product_description', flat=True)
+        return Product.objects.filter(
+            alaris_product_id__in=obj.alaris_product_id
+        ).values_list('product_description', flat=True)
 
     class Meta:
         model = Task
