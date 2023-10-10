@@ -1,8 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Result(BaseModel):
-    to: str
+    msisdn: str = Field(alias='to')
     mccMnc: str
     imsi: str
     ported: bool
@@ -14,7 +14,7 @@ class InfobipHlrResponse(BaseModel):
 
 
 class TmtHlrResponse(BaseModel):
-    number: int
+    msisdn: int = Field(alias='number')
     mcc: str
     mnc: str
     network: str
@@ -24,15 +24,15 @@ class TmtHlrResponse(BaseModel):
 
 
 class XconnectHlrResponse(BaseModel):
-    tn: str
+    msisdn: str = Field(alias='tn')
     mcc: str
     mnc: str
-    ns: str
-    npi: bool
+    present: str = Field(alias='ns')
+    ported: bool = Field(alias='npi')
 
 
 class XconnectMnpResponse(BaseModel):
-    tn: str
+    msisdn: str = Field(alias='tn')
     mcc: str
     mnc: str
-    npi: bool
+    ported: bool = Field(alias='npi')

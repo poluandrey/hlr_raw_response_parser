@@ -1,17 +1,18 @@
 from enum import Enum, auto
-from parser.hlr_responses import (InfobipHlrResponse, TmtHlrResponse,
-                                  XconnectHlrResponse, XconnectMnpResponse)
+from hlr.parser.hlr_responses import (InfobipHlrResponse, TmtHlrResponse,
+                                      XconnectHlrResponse, XconnectMnpResponse)
 from typing import Any, Protocol
+from typing_extensions import assert_never, NoReturn
 
 from pydantic import BaseModel
 
 
 class MsisdnInfo(BaseModel):
-    msisdn: str | int
+    msisdn: str
     mcc: str
     mnc: str
     ported: int
-    present: str | None | bool
+    present: bool | None
 
 
 class HlrParser(Protocol):
@@ -42,26 +43,22 @@ class TmtHlrHlrParser(HlrParser):
     """
 
     def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
-        hlr_response = self.convert_raw_response_to_obj(raw_response)
-        msisdn = hlr_response.number
-        mcc = hlr_response.mcc
-        mnc = hlr_response.mnc
-        ported = hlr_response.ported
-        present = hlr_response.present
+        msisdn = list(raw_response.keys())[0]
+        hlr_response = TmtHlrResponse(**raw_response[msisdn])
+        # msisdn_info = raw_response[msisdn]
+        # msisdn = str(msisdn_info['number'])
+        # mcc = msisdn_info['mcc']
+        # mnc = msisdn_info['mnc']
+        # ported = msisdn_info['ported']
+        # TODO after providing documentation parse the value correctly
+        # present = bool(msisdn_info['present'])
         return MsisdnInfo(
-            msisdn=msisdn,
-            mcc=mcc,
-            mnc=mnc,
-            ported=ported,
-            present=present,
+            msisdn=str(hlr_response.msisdn),
+            mcc=hlr_response.mcc,
+            mnc=hlr_response.mnc,
+            ported=hlr_response.ported,
+            present=bool(hlr_response.present),
         )
-
-    def convert_raw_response_to_obj(
-            self,
-            raw_response: dict[str, Any],
-    ) -> TmtHlrResponse:
-        for _, value in raw_response.items():
-            return TmtHlrResponse(**value)
 
 
 class InfobipHlrHlrParser:
@@ -99,23 +96,10 @@ class InfobipHlrHlrParser:
      }]}
     """
 
-    # def get_result(self, raw_response: dict[str, Any]) -> dict[str, Any]:
-    #     if 'results' not in list(raw_response.keys()):
-    #         raise InvalidRawResponseError(
-    #             'Results in raw response is not a list instance',
-    #         )
-    #
-    #     if not isinstance(raw_response['results'], list):
-    #         raise InvalidRawResponseError(
-    #             'Msisdn details not found in raw response',
-    #         )
-    #
-    #     return raw_response['results'][0]
-
     def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
-        hlr_response = self.convert_raw_response_to_obj(raw_response)
+        hlr_response = InfobipHlrResponse(**raw_response)
         result = hlr_response.results[0]
-        msisdn = result.to
+        msisdn = result.msisdn
         mcc = result.mccMnc[:2]
         mnc = result.mccMnc[2:]
         ported = result.ported
@@ -127,12 +111,6 @@ class InfobipHlrHlrParser:
             ported=ported,
             present=present,
         )
-
-    def convert_raw_response_to_obj(
-            self,
-            raw_response: dict[str, Any],
-    ) -> InfobipHlrResponse:
-        return InfobipHlrResponse(**raw_response)
 
 
 class XconnectHlrParser:
@@ -152,20 +130,14 @@ class XconnectHlrParser:
     """
 
     def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
-        hlr_response = self.convert_raw_response_to_obj(raw_response)
+        hlr_response = XconnectHlrResponse(**raw_response)
         return MsisdnInfo(
-            msisdn=hlr_response.tn,
+            msisdn=hlr_response.msisdn,
             mcc=hlr_response.mcc,
             mnc=hlr_response.mnc,
-            ported=hlr_response.npi,
-            present=hlr_response.npi,
+            ported=hlr_response.ported,
+            present=bool(hlr_response.present),
         )
-
-    def convert_raw_response_to_obj(
-            self,
-            raw_response: dict[str, Any],
-    ) -> XconnectHlrResponse:
-        return XconnectHlrResponse(**raw_response)
 
 
 class XconnectMnpParser:
@@ -182,24 +154,14 @@ class XconnectMnpParser:
     """
 
     def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
-        msisdn = raw_response['tn']
-        mcc = raw_response['mcc']
-        mnc = raw_response['mnc']
-        ported = raw_response['npi']
-        present = None
+        xconnect_response = XconnectMnpResponse(**raw_response)
         return MsisdnInfo(
-            msisdn=msisdn,
-            mcc=mcc,
-            mnc=mnc,
-            ported=ported,
-            present=present,
+            msisdn=xconnect_response.msisdn,
+            mcc=xconnect_response.mcc,
+            mnc=xconnect_response.mnc,
+            ported=xconnect_response.ported,
+            present=bool(xconnect_response.ported),
         )
-
-    def convert_raw_response_to_obj(
-            self,
-            raw_response: dict[str, Any],
-    ) -> XconnectMnpResponse:
-        return XconnectMnpResponse(**raw_response)
 
 
 class HlrParserType(Enum):
@@ -220,4 +182,4 @@ def create_parser(provider_type: HlrParserType) -> HlrParser:
         case provider_type.XCONNECT_HLR:
             return XconnectHlrParser()
         case _:
-            raise ValueError('Unexpected provider type')
+            raise assert_never(NoReturn)

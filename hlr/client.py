@@ -3,29 +3,29 @@ import dataclasses
 import httpx
 from pydantic import BaseModel, Field
 
-from hlr_client.errors import (HlrClientHTTPError, HlrClientInternalError,
+from hlr.client_errors import (HlrClientHTTPError, HlrClientError,
                                HlrProxyInternalError, HlrVendorNotFoundError)
 
 
-class HlrSuccessfulResponse(BaseModel):
+class HlrResponse(BaseModel):
     message_id: str
     msisdn: str = Field(alias='dnis')
-    source_name: str | None = None
-    mccmnc: str | None = None
+    source_name: str
+    mccmnc: str
     result: int
-    ported: int | None = None
-    cached: int | None = None
-    context_log: str | None = None
-    message: str | None = None
+    ported: int
+    cached: int
+    context_log: str
+    message: str
 
 
 @dataclasses.dataclass(kw_only=True, slots=True, frozen=True)
 class HlrFailedResponse:
     msisdn: str = Field(alias='dnis')
-    result: int | None = None
+    result: int
     message_id: str | None = None
     message: str
-    provider: str | None = None
+    provider: str
     http_error: int | None = None
 
 
@@ -37,7 +37,7 @@ class HlrClient:
             'password': password,
             'debug': '1',
         }
-        self.session = httpx.Client(
+        self.client = httpx.Client(
             base_url=base_url,
             params=self.request_params,
         )
@@ -46,33 +46,36 @@ class HlrClient:
             self,
             provider: str,
             msisdn: str,
-    ) -> HlrSuccessfulResponse:
+    ) -> HlrResponse:
         params = {'dnis': msisdn, 'source_name': provider}
         try:
-            with self.session as s:
+            with self.client as s:
                 resp = s.get('mccmnc_request', params=params)
                 resp.raise_for_status()
-                hlr_resp = HlrSuccessfulResponse(**resp.json())
-                if hlr_resp.result == 0:
-                    return hlr_resp
+                hlr_resp = resp.json()
+                hlr_resp_result = hlr_resp['result']
+                if hlr_resp_result == 0:
+                    return HlrResponse(**hlr_resp)
 
-                if hlr_resp.result == -2:
+                if hlr_resp_result == -2:
                     raise HlrVendorNotFoundError(
-                        msisdn=hlr_resp.msisdn,
-                        message=hlr_resp.message,
-                        result=hlr_resp.result,
-                        message_id=hlr_resp.message_id,
+                        message=hlr_resp['message'],
+                        result=hlr_resp_result,
+                        message_id=hlr_resp['message_id'],
                     )
+
+                message = hlr_resp.get('message')
+                if not message:
+                    message = hlr_resp.get('error')
+
                 raise HlrProxyInternalError(
-                    msisdn=hlr_resp.msisdn,
-                    message=hlr_resp.message,
-                    result=hlr_resp.result,
-                    message_id=hlr_resp.message_id,
+                    message=message,
+                    result=hlr_resp_result,
+                    message_id=hlr_resp['message_id'],
                 )
         except httpx.HTTPStatusError as error:
             raise HlrClientHTTPError(
                 error_code=error.response.status_code,
             ) from error
         except httpx.HTTPError as error:
-            # тут наверное должна логироваться ошибка
-            raise HlrClientInternalError from error
+            raise HlrClientError from error

@@ -1,0 +1,32 @@
+version: '3'
+
+volumes:
+  tech_service_postgres_data: {}
+  
+services:
+  django: &django
+    build:
+      context: .
+      dockerfile: ./compose/django/Dockerfile
+    image: tech_service_django
+    container_name: tech_service_django
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app:z
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    command: /start
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./compose/postgres/Dockerfile
+    image: tech_service_postgres
+    container_name: tech_service_postgres
+    volumes:
+      - tech_service_postgres_data:/var/lib/postgresql/data
+    env_file:
+      - .env
