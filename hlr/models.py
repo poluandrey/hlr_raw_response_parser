@@ -9,8 +9,7 @@ class Task(models.Model):
     status = FSMField(default='new')
     author = models.ForeignKey(
         User,
-        on_delete=models.SET_NULL,
-        null=True,
+        on_delete=models.RESTRICT,
         related_name='tasks',
     )
     insert_time = models.DateTimeField(auto_now_add=True)
