@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 
-class Result(BaseModel):
+class InfobipResult(BaseModel):
     msisdn: str = Field(alias='to')
     mccMnc: str
     imsi: str
@@ -10,7 +10,7 @@ class Result(BaseModel):
 
 
 class InfobipHlrResponse(BaseModel):
-    results: list[Result]
+    results: list[InfobipResult]
 
 
 class TmtHlrResponse(BaseModel):
@@ -18,7 +18,7 @@ class TmtHlrResponse(BaseModel):
     mcc: str
     mnc: str
     network: str
-    ported: bool
+    ported: bool | str
     present: str
     type: str
 
