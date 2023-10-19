@@ -3,7 +3,7 @@ import dataclasses
 import httpx
 from pydantic import BaseModel, Field
 
-from hlr.client_errors import (HlrClientHTTPError, HlrClientError,
+from hlr.client_errors import (HlrClientError, HlrClientHTTPError,
                                HlrProxyInternalError, HlrVendorNotFoundError)
 
 

@@ -9,3 +9,7 @@ django-extensions==3.2.3
 django-fsm==2.8.1
 gunicorn==21.2.0
 whitenoise==6.5.0
+djangorestframework==3.14.0
+drf-spectacular==0.26.5
+pydot==1.4.2
+graphviz==0.20.1

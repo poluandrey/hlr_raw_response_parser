@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from itertools import product
 
 from hlr.client import HlrClient, HlrFailedResponse, HlrResponse
-from hlr.client_errors import (HlrClientHTTPError, HlrClientError,
+from hlr.client_errors import (HlrClientError, HlrClientHTTPError,
                                HlrProxyError, HlrVendorNotFoundError)
 
 
