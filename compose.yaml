@@ -1,32 +1,38 @@
 version: '3'
 
-volumes:
-  tech_service_postgres_data: {}
-  
 services:
-  django: &django
+  django:
     build:
       context: .
-      dockerfile: ./compose/django/Dockerfile
-    image: tech_service_django
-    container_name: tech_service_django
     depends_on:
-      - postgres
-    volumes:
-      - .:/app:z
+      postgres:
+        condition: service_healthy
     env_file:
       - .env
     ports:
       - "8000:8000"
-    command: /start
-
-  postgres:
+    command: bash -c "
+              python manage.py collectstatic --noinput 
+              && gunicorn tech_service.wsgi:application  -w ${WORKER_COUNT} -b :${APP_PORT}"
+  migration:
     build:
       context: .
-      dockerfile: ./compose/postgres/Dockerfile
-    image: tech_service_postgres
-    container_name: tech_service_postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    command: python manage.py migrate
+  postgres:
+    image: postgres:14
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test:  [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
-      - tech_service_postgres_data:/var/lib/postgresql/data
+      - ./.data/postgres:/var/lib/postgresql/data
     env_file:
       - .env
