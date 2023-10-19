@@ -29,7 +29,8 @@ class HlrFailedResponse:
 def convert_from_hlr_error(
         error: HlrVendorNotFoundError | HlrProxyError,
         msisdn: str,
-        provider: str) -> HlrFailedResponse:
+        provider: str,
+) -> HlrFailedResponse:
     return HlrFailedResponse(
         msisdn=msisdn,
         provider=provider,
@@ -39,7 +40,11 @@ def convert_from_hlr_error(
     )
 
 
-def convert_from_hlr_http_error(error: HlrClientHTTPError, msisdn: str, provider: str) -> HlrFailedResponse:
+def convert_from_hlr_http_error(
+        error: HlrClientHTTPError,
+        msisdn: str,
+        provider: str,
+) -> HlrFailedResponse:
     return HlrFailedResponse(
         msisdn=msisdn,
         provider=provider,
@@ -49,7 +54,11 @@ def convert_from_hlr_http_error(error: HlrClientHTTPError, msisdn: str, provider
     )
 
 
-def convert_from_hlr_failed_response(error: HlrClientError, msisdn: str, provider: str) -> HlrFailedResponse:
+def convert_from_hlr_failed_response(
+        error: HlrClientError,
+        msisdn: str,
+        provider: str,
+) -> HlrFailedResponse:
     return HlrFailedResponse(
         msisdn=msisdn,
         provider=provider,

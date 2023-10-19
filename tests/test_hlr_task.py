@@ -1,5 +1,3 @@
-from unittest import mock
-
 from hlr.client.errors import HlrVendorNotFoundError
 from hlr.tasks import handle_task
 

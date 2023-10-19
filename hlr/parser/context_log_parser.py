@@ -20,7 +20,6 @@ def serialize_context_log(context_log: str) -> dict[str, Any]:
     try:
         return json.loads(context_log)
     except json.JSONDecodeError as error:
-        print(context_log)
         raise InvalidContextLogError from error
 
 

@@ -17,10 +17,14 @@ def test__serialize_context_log__raise_error_when_not_json_context_log_provided(
         serialize_context_log(context_log_not_serializable_context_log)
 
 
-def test__get_nested_context_log__return_nested_context_log(context_log_valid):
-    context_log = serialize_context_log(context_log_valid)
+def test__get_nested_context_log__return_nested_context_log():
 
-    assert get_nested_context_log(context_log)
+    assert get_nested_context_log({'contextLog': 'test'}) == 'test'
+
+
+def test__get_nested_context_log__raise_error_when_key_not_found(faker):
+    with pytest.raises(InvalidContextLogError):
+        get_nested_context_log({faker.pystr(): faker.pystr()})
 
 
 def test__get_nested_context_log__raise_error_if_context_log_not_presented(context_log_without_nested_context_log):

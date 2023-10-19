@@ -18,6 +18,7 @@ def handle_hlr_response(hlr_response: dict[str, Any]) -> HlrResponse:
             result=hlr_resp_result,
             message_id=hlr_response['message_id'],
         )
+
     message = hlr_response.get('message')
     if not message:
         message = hlr_response.get('error')
@@ -27,8 +28,6 @@ def handle_hlr_response(hlr_response: dict[str, Any]) -> HlrResponse:
         result=hlr_resp_result,
         message_id=hlr_response['message_id'],
     )
-
-
 
 
 class HlrClient:

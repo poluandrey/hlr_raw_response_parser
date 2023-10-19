@@ -134,8 +134,10 @@ class XconnectHlrParser:
     def parse_presents(self, hlr_response: XconnectHlrResponse) -> str:
         if hlr_response.present == '000':
             return 'yes'
-        elif hlr_response.present == '004':
+
+        if hlr_response.present == '004':
             return 'no answer'
+
         return 'no'
 
 
