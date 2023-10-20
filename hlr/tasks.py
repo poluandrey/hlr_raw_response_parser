@@ -1,13 +1,9 @@
-import dataclasses
 from dataclasses import dataclass
 from itertools import product
 
-from pydantic import Field
-
-from hlr.client.client import HlrClient
-from hlr.client.errors import (HlrClientError, HlrClientHTTPError,
+from hlr.client import HlrClient, HlrFailedResponse, HlrResponse
+from hlr.client_errors import (HlrClientError, HlrClientHTTPError,
                                HlrProxyError, HlrVendorNotFoundError)
-from hlr.client.schemas import HlrResponse
 
 
 @dataclass(kw_only=True, frozen=True, slots=True)
@@ -72,15 +68,11 @@ def handle_task(
         hlr_client: HlrClient,
 ) -> tuple[list[HlrResponse], list[HlrFailedResponse]]:
     details, errors = [], []
-    for msisdn, provider in product(task.msisdns, task.providers):
-        try:
-            msisdn_info = hlr_client.get_mccmnc_info(msisdn=msisdn, provider=provider)
-            details.append(msisdn_info)
-        except HlrVendorNotFoundError as error:
-            errors.append(convert_from_hlr_error(error, msisdn=msisdn, provider=provider))
-        except HlrProxyError as error:
-            errors.append(convert_from_hlr_error(error, msisdn=msisdn, provider=provider))
-        except HlrClientHTTPError as error:
-            errors.append(convert_from_hlr_http_error(error, msisdn=msisdn, provider=provider))
+    try:
+        msisdn_info = hlr_client.get_mccmnc_info(msisdn=task.msisdn, provider=task.provider)
+        details.append(msisdn_info)
+    except HlrClientError as error:
+        failed_response = handle_client_error(error, msisdn=task.msisdn, provider=task.provider)
+        errors.append(failed_response)
 
     return details, errors

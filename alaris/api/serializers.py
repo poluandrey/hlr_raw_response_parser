@@ -8,14 +8,14 @@ class ProductSerializer(ModelSerializer):
     class Meta:
         model = Product
         fields = ['id',
-                  'alaris_product_id',
-                  'acc_currency_code',
-                  'alaris_acc_id',
+                  'external_product_id',
+                  'account_currency_code',
+                  'external_account_id',
                   'carrier',
                   'is_active',
-                  'product_caption',
-                  'product_description',
-                  'product_notes',
-                  'product_type',
+                  'caption',
+                  'description',
+                  'notes',
+                  'type',
                   'last_update_time',
                   ]
