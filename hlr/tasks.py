@@ -8,8 +8,8 @@ from hlr.client_errors import (HlrClientError, HlrClientHTTPError,
 
 @dataclass(kw_only=True, frozen=True, slots=True)
 class Task:
-    providers: list[str]
-    msisdns: list[str]
+    provider: str
+    msisdn: str
 
 
 def handle_client_error(error: HlrClientError, msisdn: str, provider: str) -> HlrFailedResponse:
@@ -45,12 +45,11 @@ def handle_task(
         hlr_client: HlrClient,
 ) -> tuple[list[HlrResponse], list[HlrFailedResponse]]:
     details, errors = [], []
-    for msisdn, provider in product(task.msisdns, task.providers):
-        try:
-            msisdn_info = hlr_client.get_mccmnc_info(msisdn=msisdn, provider=provider)
-            details.append(msisdn_info)
-        except HlrClientError as error:
-            failed_response = handle_client_error(error, msisdn=msisdn, provider=provider)
-            errors.append(failed_response)
+    try:
+        msisdn_info = hlr_client.get_mccmnc_info(msisdn=task.msisdn, provider=task.provider)
+        details.append(msisdn_info)
+    except HlrClientError as error:
+        failed_response = handle_client_error(error, msisdn=task.msisdn, provider=task.provider)
+        errors.append(failed_response)
 
     return details, errors

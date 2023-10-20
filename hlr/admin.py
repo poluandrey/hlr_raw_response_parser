@@ -9,8 +9,6 @@ class TaskAdmin(admin.ModelAdmin):
         'id',
         'status',
         'author',
-        'external_product_id',
-        'msisdn',
         'insert_time',
         'last_update_time',
     ]
