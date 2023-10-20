@@ -12,8 +12,8 @@ class TaskRetrieveSerializer(serializers.ModelSerializer[Task]):
 
     def get_hlr_provider(self, obj: Task):
         return Product.objects.filter(
-            alaris_product_id__in=obj.alaris_product_id
-        ).values_list('product_description', flat=True)
+            external_product_id__in=obj.external_product_id
+        ).values_list('description', flat=True)
 
     class Meta:
         model = Task
@@ -24,7 +24,7 @@ class TaskCreateSerializer(serializers.ModelSerializer[Task]):
 
     class Meta:
         model = Task
-        fields = ['author', 'alaris_product_id', 'msisdn']
+        fields = ['author', 'external_product_id', 'msisdn']
 
 
 class TaskDetailSerializer(serializers.ModelSerializer[TaskDetail]):
@@ -33,10 +33,10 @@ class TaskDetailSerializer(serializers.ModelSerializer[TaskDetail]):
         model = TaskDetail
         fields = ['id',
                   'task',
-                  'alaris_product_id',
+                  'external_product_id',
                   'msisdn',
                   'result',
-                  'mcc',
-                  'mnc',
+                  'mccmnc',
                   'ported',
-                  'message']
+                  'message',
+                  ]

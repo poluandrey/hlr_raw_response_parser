@@ -19,10 +19,10 @@ class TaskView(GenericViewSet, CreateModelMixin, ListModelMixin, RetrieveModelMi
 
         return self.serializer_class
 
-    @action(methods=['get', ], detail=True)
-    def detail(self, pk=None):
+    @action(methods=['get'], detail=True)
+    def details(self, request, pk=None):
         task = self.get_object()
-        task_detail = task.objects.details.all()
+        task_detail = task.details.all()
         serializer = TaskDetailSerializer(task_detail, many=True)
         return Response(serializer.data)
 

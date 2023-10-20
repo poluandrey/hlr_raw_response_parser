@@ -7,15 +7,15 @@ from alaris.models import Carrier, Product, ProductType
 class ProductAdmin(admin.ModelAdmin):
     list_display = [
         'id',
-        'alaris_product_id',
-        'acc_currency_code',
-        'alaris_acc_id',
+        'external_product_id',
+        'account_currency_code',
+        'external_account_id',
         'carrier',
         'is_active',
-        'product_caption',
-        'product_direction',
-        'product_notes',
-        'product_type',
+        'caption',
+        'direction',
+        'notes',
+        'type',
         'insert_time',
         'last_update_time',
     ]
@@ -25,8 +25,8 @@ class ProductAdmin(admin.ModelAdmin):
 class ProductType(admin.ModelAdmin):
     list_display = [
         'id',
-        'alaris_product_type_id',
-        'type_name',
+        'external_product_type_id',
+        'name',
         'insert_time',
         'last_update_time',
     ]
@@ -36,9 +36,9 @@ class ProductType(admin.ModelAdmin):
 class CarrierAdmin(admin.ModelAdmin):
     list_display = [
         'id',
-        'alaris_car_id',
-        'car_name',
-        'car_is_active',
+        'external_carrier_id',
+        'name',
+        'is_active',
         'insert_time',
         'last_update_time',
     ]
