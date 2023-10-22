@@ -1,15 +1,19 @@
+import dataclasses
 from dataclasses import dataclass
-from itertools import product
 
-from hlr.client import HlrClient, HlrFailedResponse, HlrResponse
-from hlr.client_errors import (HlrClientError, HlrClientHTTPError,
+from celery import shared_task
+from pydantic import Field
+
+from hlr.client.client import HlrResponse
+from hlr.client.errors import (HlrClientError, HlrClientHTTPError,
                                HlrProxyError, HlrVendorNotFoundError)
+from hlr.client.client import HlrClient
 
 
 @dataclass(kw_only=True, frozen=True, slots=True)
 class Task:
-    providers: list[str]
-    msisdns: list[str]
+    provider: str
+    msisdn: str
 
 
 @dataclasses.dataclass(kw_only=True, slots=True, frozen=True)
@@ -71,8 +75,18 @@ def handle_task(
     try:
         msisdn_info = hlr_client.get_mccmnc_info(msisdn=task.msisdn, provider=task.provider)
         details.append(msisdn_info)
-    except HlrClientError as error:
-        failed_response = handle_client_error(error, msisdn=task.msisdn, provider=task.provider)
-        errors.append(failed_response)
+    except HlrVendorNotFoundError as error:
+        errors.append(convert_from_hlr_error(error, msisdn=task.msisdn, provider=task.provider))
+    except HlrProxyError as error:
+        errors.append(convert_from_hlr_error(error, msisdn=task.msisdn, provider=task.provider))
+    except HlrClientHTTPError as error:
+        errors.append(convert_from_hlr_http_error(error, msisdn=task.msisdn, provider=task.provider))
 
     return details, errors
+
+@shared_task()
+def celery_task_handler(task: Task):
+    hlr_client = HlrClient(login='alaris', password='alaris', base_url='https://hlr.lancktele.com/hlr')
+    detail, error = handle_task(task, hlr_client)
+    print(detail, error)
+    return handle_task(task, hlr_client)

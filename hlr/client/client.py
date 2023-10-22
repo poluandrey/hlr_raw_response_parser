@@ -50,11 +50,11 @@ class HlrClient:
     ) -> HlrResponse:
         params = {'dnis': msisdn, 'source_name': provider}
         try:
-            with self.client as s:
-                resp = s.get('mccmnc_request', params=params)
-                resp.raise_for_status()
-                hlr_resp = resp.json()
-                return handle_hlr_response(hlr_resp)
+            # with self.client as s:
+            resp = self.client.get('mccmnc_request', params=params)
+            resp.raise_for_status()
+            hlr_resp = resp.json()
+            return handle_hlr_response(hlr_resp)
         except httpx.HTTPStatusError as error:
             raise HlrClientHTTPError(
                 error_code=error.response.status_code,

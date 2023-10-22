@@ -287,18 +287,8 @@ def hlr_response_hlr_proxy_internal_error_contain_error():
 
 
 @fixture()
-def hlr_task_empty():
-    return Task(providers=[], msisdns=[])
-
-
-@fixture()
 def hlr_task():
-    return Task(providers=['any_provider'], msisdns=['79999999999'])
-
-
-@fixture()
-def hlr_task_for_few_number():
-    return Task(providers=['any_provider'], msisdns=['79999999999', '79999999998'])
+    return Task(provider='any_provider', msisdn='79999999999')
 
 
 @fixture()

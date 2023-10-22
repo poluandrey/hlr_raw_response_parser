@@ -3,6 +3,8 @@ from django.db import models
 from django_fsm import FSMField, transition
 
 from alaris.models import Product
+from hlr.parser.hlr_parser import HlrParserType
+
 
 User = get_user_model()
 
@@ -49,3 +51,14 @@ class TaskDetail(models.Model):
     def __str__(self):
         return (f'{self.pk} for {self.msisdn} via {self.external_product_id} '
                 f'created by {self.task.author}')
+
+
+# модель пока не заработала
+class HlrProduct(models.Model):
+    external_product_id = models.ForeignKey(
+        Product,
+        on_delete=models.RESTRICT,
+        to_field='external_product_id'
+    )
+    # type = models.CharField(choices=HlrParserType)
+

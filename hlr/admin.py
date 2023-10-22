@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from hlr.models import Task, TaskDetail
+from hlr.models import Task, TaskDetail, HlrProduct
 
 
 @admin.register(Task)
@@ -27,3 +27,11 @@ class TaskDetailAdmin(admin.ModelAdmin):
         'message',
         'http_error_code',
     ]
+
+# @admin.register(HlrProduct)
+# class HlrProductAdmin(admin.ModelAdmin):
+#     list_display = [
+#         'id',
+#         'external_product_id',
+#         'type',
+#     ]
