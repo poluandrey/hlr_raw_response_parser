@@ -13,3 +13,6 @@ djangorestframework==3.14.0
 drf-spectacular==0.26.5
 pydot==1.4.2
 graphviz==0.20.1
+Faker===19.10.0
+redis==5.0.1
+celery==5.3.4

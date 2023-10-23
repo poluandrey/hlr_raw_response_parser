@@ -1,7 +1,7 @@
 from enum import Enum, auto
 from typing import Any, Protocol
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing_extensions import NoReturn, assert_never
 
 from hlr.parser.hlr_responses import (InfobipHlrResponse, TmtHlrResponse,
@@ -10,10 +10,10 @@ from hlr.parser.hlr_responses import (InfobipHlrResponse, TmtHlrResponse,
 
 class MsisdnInfo(BaseModel):
     msisdn: str
-    mcc: str
-    mnc: str
-    ported: int
-    present: bool | None
+    mccmnc: str
+    ported: str | int = Field('no answer')
+    presents: str | None = Field('no answer')
+    roaming: str = Field('no answer')
 
 
 class HlrParser(Protocol):
@@ -34,7 +34,7 @@ class TmtHlrHlrParser(HlrParser):
         "network": "Mobilnyye TeleSistemy pjsc (MTS)",
         "number": 79216503431,
         "ported": true,
-        "present": "na",
+        "presents": "na",
         "status": 0,
         "status_message": "Success",
         "type": "mobile",
@@ -46,19 +46,11 @@ class TmtHlrHlrParser(HlrParser):
     def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
         msisdn = list(raw_response.keys())[0]
         hlr_response = TmtHlrResponse(**raw_response[msisdn])
-        # msisdn_info = raw_response[msisdn]
-        # msisdn = str(msisdn_info['number'])
-        # mcc = msisdn_info['mcc']
-        # mnc = msisdn_info['mnc']
-        # ported = msisdn_info['ported']
-        # TODO after providing documentation parse the value correctly
-        # present = bool(msisdn_info['present'])
         return MsisdnInfo(
             msisdn=str(hlr_response.msisdn),
-            mcc=hlr_response.mcc,
-            mnc=hlr_response.mnc,
+            mccmnc=f'{hlr_response.mcc}0{hlr_response.mnc}',
             ported=hlr_response.ported,
-            present=bool(hlr_response.present),
+            presents=hlr_response.present,
         )
 
 
@@ -103,14 +95,13 @@ class InfobipHlrHlrParser:
         msisdn = result.msisdn
         mcc = result.mccMnc[:2]
         mnc = result.mccMnc[2:]
-        ported = result.ported
+        ported = 1 if result.ported else 0
         present = None
         return MsisdnInfo(
             msisdn=msisdn,
-            mcc=mcc,
-            mnc=mnc,
+            mccmnc=f'{mcc}0{mnc}',
             ported=ported,
-            present=present,
+            presents=present,
         )
 
 
@@ -132,13 +123,22 @@ class XconnectHlrParser:
 
     def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
         hlr_response = XconnectHlrResponse(**raw_response)
+        presents = self.parse_presents(hlr_response)
         return MsisdnInfo(
             msisdn=hlr_response.msisdn,
-            mcc=hlr_response.mcc,
-            mnc=hlr_response.mnc,
+            mccmnc=f'{hlr_response.mcc}0{hlr_response.mnc}',
             ported=hlr_response.ported,
-            present=bool(hlr_response.present),
+            presents=presents,
         )
+
+    def parse_presents(self, hlr_response: XconnectHlrResponse) -> str:
+        if hlr_response.present == '000':
+            return 'yes'
+
+        if hlr_response.present == '004':
+            return 'no answer'
+
+        return 'no'
 
 
 class XconnectMnpParser:
@@ -158,10 +158,8 @@ class XconnectMnpParser:
         xconnect_response = XconnectMnpResponse(**raw_response)
         return MsisdnInfo(
             msisdn=xconnect_response.msisdn,
-            mcc=xconnect_response.mcc,
-            mnc=xconnect_response.mnc,
-            ported=xconnect_response.ported,
-            present=bool(xconnect_response.ported),
+            mccmnc=f'{xconnect_response.mcc}0{xconnect_response.mnc}',
+            ported='yes' if xconnect_response.ported else 'no',
         )
 
 

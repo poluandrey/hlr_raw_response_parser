@@ -13,7 +13,7 @@ class HlrProxyError(HlrClientError):
             self,
             result: int,
             message_id: str,
-            message: str,
+            message: str | None,
 
     ) -> None:
         self.result = result

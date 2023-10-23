@@ -12,40 +12,44 @@ def test__serialize_context_log__raise_error_when_empty_context_log_provided():
         serialize_context_log('')
 
 
-def test__serialize_context_log__raise_error_when_not_json_context_log_provided(context_log):
+def test__serialize_context_log__raise_error_when_not_json_context_log_provided(context_log_not_serializable_context_log):
     with pytest.raises(InvalidContextLogError):
-        serialize_context_log(context_log(not_serializable_context_log=True))
+        serialize_context_log(context_log_not_serializable_context_log)
 
 
-def test__get_nested_context_log__return_nested_context_log(context_log):
-    context_log = serialize_context_log(context_log(is_valid=True))
+def test__get_nested_context_log__return_nested_context_log():
 
-    assert get_nested_context_log(context_log)
+    assert get_nested_context_log({'contextLog': 'test'}) == 'test'
 
 
-def test__get_nested_context_log__raise_error_if_context_log_not_presented(context_log):
-    context_log = serialize_context_log(context_log(without_nested_context_log=True))
+def test__get_nested_context_log__raise_error_when_key_not_found(faker):
+    with pytest.raises(InvalidContextLogError):
+        get_nested_context_log({faker.pystr(): faker.pystr()})
+
+
+def test__get_nested_context_log__raise_error_if_context_log_not_presented(context_log_without_nested_context_log):
+    context_log = serialize_context_log(context_log_without_nested_context_log)
 
     with pytest.raises(InvalidContextLogError):
         get_nested_context_log(context_log)
 
 
-def test__extruct_raw_response__raise_error_when_raw_response_not_found(context_log):
-    context_log = serialize_context_log(context_log(without_raw_response=True))
+def test__extruct_raw_response__raise_error_when_raw_response_not_found(context_log_without_raw_response):
+    context_log = serialize_context_log(context_log_without_raw_response)
     nested_context_log = get_nested_context_log(context_log)
 
     with pytest.raises(RawResponseNotFoundError):
         extruct_raw_response(nested_context_log)
 
 
-def test__extruct_raw_response__return_raw_response(context_log):
-    context_log = serialize_context_log(context_log(is_valid=True))
+def test__extruct_raw_response__return_raw_response(context_log_valid):
+    context_log = serialize_context_log(context_log_valid)
     nested_context_log = get_nested_context_log(context_log)
     assert extruct_raw_response(nested_context_log)
 
 
-def test__get_raw_response__raise_error_if_raw_response_is_not_serializable(context_log):
-    context_log = serialize_context_log(context_log(not_serializable_raw_response=True))
+def test__get_raw_response__raise_error_if_raw_response_is_not_serializable(context_log_not_serializable_raw_response):
+    context_log = serialize_context_log(context_log_not_serializable_raw_response)
     nested_context_log = get_nested_context_log(context_log)
     with pytest.raises(RawResponseNotFoundError):
         extruct_raw_response(nested_context_log)

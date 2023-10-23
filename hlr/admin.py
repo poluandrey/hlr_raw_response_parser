@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from hlr.models import Task, TaskDetail
+from hlr.models import Task, TaskDetail, HlrProduct
 
 
 @admin.register(Task)
@@ -9,8 +9,6 @@ class TaskAdmin(admin.ModelAdmin):
         'id',
         'status',
         'author',
-        'alaris_product_id',
-        'msisdn',
         'insert_time',
         'last_update_time',
     ]
@@ -21,12 +19,19 @@ class TaskDetailAdmin(admin.ModelAdmin):
     list_display = [
         'id',
         'task',
-        'alaris_product_id',
+        'external_product_id',
         'msisdn',
         'result',
-        'mcc',
-        'mnc',
+        'mccmnc',
         'ported',
         'message',
         'http_error_code',
     ]
+
+# @admin.register(HlrProduct)
+# class HlrProductAdmin(admin.ModelAdmin):
+#     list_display = [
+#         'id',
+#         'external_product_id',
+#         'type',
+#     ]
