@@ -11,9 +11,9 @@ from hlr.parser.hlr_responses import (InfobipHlrResponse, TmtHlrResponse,
 class MsisdnInfo(BaseModel):
     msisdn: str
     mccmnc: str
-    ported: str | int = Field('no answer')
-    presents: str | None = Field('no answer')
-    roaming: str = Field('no answer')
+    ported: bool | None
+    presents: bool | None
+    roaming: bool | None
 
 
 class HlrParser(Protocol):
@@ -50,8 +50,16 @@ class TmtHlrHlrParser(HlrParser):
             msisdn=str(hlr_response.msisdn),
             mccmnc=f'{hlr_response.mcc}0{hlr_response.mnc}',
             ported=hlr_response.ported,
-            presents=hlr_response.present,
+            presents=self.parse_present(hlr_response.present),
+            roaming=None
         )
+
+    def parse_present(self, present):
+        if present == 'na':
+            return None
+        if present == 'yes':
+            return True
+        return False
 
 
 class InfobipHlrHlrParser:
@@ -95,13 +103,14 @@ class InfobipHlrHlrParser:
         msisdn = result.msisdn
         mcc = result.mccMnc[:2]
         mnc = result.mccMnc[2:]
-        ported = 1 if result.ported else 0
+        ported = result.ported
         present = None
         return MsisdnInfo(
             msisdn=msisdn,
             mccmnc=f'{mcc}0{mnc}',
             ported=ported,
             presents=present,
+            roaming=result.roaming
         )
 
 
@@ -129,16 +138,17 @@ class XconnectHlrParser:
             mccmnc=f'{hlr_response.mcc}0{hlr_response.mnc}',
             ported=hlr_response.ported,
             presents=presents,
+            roaming=None,
         )
 
-    def parse_presents(self, hlr_response: XconnectHlrResponse) -> str:
+    def parse_presents(self, hlr_response: XconnectHlrResponse) -> bool | None:
         if hlr_response.present == '000':
-            return 'yes'
+            return True
 
         if hlr_response.present == '004':
-            return 'no answer'
+            return None
 
-        return 'no'
+        return False
 
 
 class XconnectMnpParser:
@@ -159,7 +169,9 @@ class XconnectMnpParser:
         return MsisdnInfo(
             msisdn=xconnect_response.msisdn,
             mccmnc=f'{xconnect_response.mcc}0{xconnect_response.mnc}',
-            ported='yes' if xconnect_response.ported else 'no',
+            ported=xconnect_response.ported,
+            presents=None,
+            roaming=None,
         )
 
 

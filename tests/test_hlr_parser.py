@@ -32,18 +32,20 @@ def test__get_msisdn_info__for_tmt_hlr_parser_return_correct_mccmnc(make_tmt_hlr
     assert msisdn_info.mccmnc == '250001'
 
 
-def test__get_msisdn_info__for_tmt_hlr_parser_return_correct_present(make_tmt_hlr_response):
+@pytest.mark.parametrize('hlr_present_resp, present', [('yes', True), ('no', False), ('na', None)])
+def test__get_msisdn_info__for_tmt_hlr_parser_return_correct_present(make_tmt_hlr_response, hlr_present_resp, present):
     parser = create_parser(HlrParserType.TMT_HLR)
-    msisdn_info = parser.get_msisdn_info(make_tmt_hlr_response(present='yes'))
+    msisdn_info = parser.get_msisdn_info(make_tmt_hlr_response(present=hlr_present_resp))
 
-    assert msisdn_info.presents == 'yes'
+    assert msisdn_info.presents == present
 
 
-def test__get_msisdn_info__for_tmt_hlr_parser_return_correct_ported(make_tmt_hlr_response):
+@pytest.mark.parametrize('hlr_ported_resp, ported', [('true', True), ('false', False)])
+def test__get_msisdn_info__for_tmt_hlr_parser_return_correct_ported(make_tmt_hlr_response, hlr_ported_resp, ported):
     parser = create_parser(HlrParserType.TMT_HLR)
-    msisdn_info = parser.get_msisdn_info(make_tmt_hlr_response(ported='N/A'))
+    msisdn_info = parser.get_msisdn_info(make_tmt_hlr_response(ported=hlr_ported_resp))
 
-    assert msisdn_info.ported == 'N/A'
+    assert msisdn_info.ported == ported
 
 
 def test__get_msisdn_info__for_infobip_parser_return_correct_msisdn(make_infobip_hlr_response):
@@ -95,11 +97,11 @@ def test__get_msisdn_info__for_xconnect_hlr_return_correct_ported(make_xconnect_
 
 
 @pytest.mark.parametrize('hlr_present_resp,presents', [
-    ('000', 'yes'),
-    ('001', 'no'),
-    ('002', 'no'),
-    ('003', 'no'),
-    ('004', 'no answer'),
+    ('000', True),
+    ('001', False),
+    ('002', False),
+    ('003', False),
+    ('004', None),
 
 ])
 def test__get_msisdn_info__for_xconnect_hlr_return_correct_present(make_xconnect_hlr_response,
@@ -126,8 +128,8 @@ def test__get_msisdn_info__for_xconnect_mnp_return_correct_mccmnc(make_xconnect_
 
 
 @pytest.mark.parametrize('hlr_ported_resp, ported', [
-    ('true', 'yes'),
-    ('false', 'no'),
+    ('true', True),
+    ('false', False),
 ])
 def test__get_msisdn_info__fir_xconnect_mnp_return_correct_ported(make_xconnect_mnp_response,
                                                                   hlr_ported_resp,

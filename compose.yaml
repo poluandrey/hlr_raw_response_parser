@@ -16,24 +16,27 @@ services:
     healthcheck:
       test: "curl --fail --silent --write-out 'HTTP CODE : %{http_code}\n' --output /dev/null http://127.0.0.1:8000/"
       interval: 60s
-      timeout: 10s
+      timeout: 1s
       retries: 10
-    command: bash -c "
-              python manage.py migrate &&
-              python manage.py collectstatic --noinput 
-              && gunicorn tech_service.wsgi:application  -w ${WORKER_COUNT} -b :${APP_PORT}"
+    command:
+      - "gunicorn"
+      - "--bind"
+      - ":${APP_PORT}"
+      - "--workers"
+      - "${WORKER_COUNT}"
+      - "tech_service.wsgi:application"
 
-#  migration:
-#    build:
-#      context: .
-#    depends_on:
-#      postgres:
-#        condition: service_healthy
-#      django:
-#        condition: service_started
-#    env_file:
-#      - .env
-#    command: python manage.py migrate
+  migration:
+    build:
+      context: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+      django:
+        condition: service_started
+    env_file:
+      - .env
+    command: python manage.py migrate
 
   postgres:
     image: postgres:14
@@ -42,7 +45,7 @@ services:
     healthcheck:
       test:  [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
       interval: 10s
-      timeout: 5s
+      timeout: 1s
       retries: 5
     volumes:
       - ./.data/postgres:/var/lib/postgresql/data
@@ -56,7 +59,7 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
       interval: 10s
-      timeout: 5s
+      timeout: 1s
       retries: 5
     volumes:
       - ./.data/redis:/data

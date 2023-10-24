@@ -51,10 +51,10 @@ def make_tmt_hlr_response(faker):
             mnc = str(faker.random_number(digits=2))
 
         if not present:
-            present = random.choice(['yes', 'no', 'N/A'])
+            present = random.choice(['yes', 'no', 'na'])
 
         if not ported:
-            ported = random.choice([True, False, 'N/A'])
+            ported = random.choice([True, False])
 
         return {
             msisdn:
@@ -81,17 +81,26 @@ def make_tmt_hlr_response(faker):
 @fixture()
 def make_infobip_hlr_response(faker):
     def infobip_hlr_response(
+            ported: bool | None = None,
+            roaming: bool | None = None,
+            present: str | None = None,
             msisdn: str | None = None,
             mccmnc: str | None = None,
-            ported: str = 'false',
-            roaming: str = 'false',
-            present: str = 'DELIVERED',
     ):
         if not msisdn:
             msisdn = str(faker.random_number(digits=13))
 
         if not mccmnc:
             mccmnc = str(faker.random_number(digits=5))
+
+        if not present:
+            present = random.choice(['DELIVERED', 'UNDELIVERABLE', 'REJECTED'])
+
+        if not roaming:
+            roaming = random.choice([True, False])
+
+        if not ported:
+            ported = random.choice([True, False])
 
         return {
             'results':
@@ -143,7 +152,7 @@ def make_xconnect_mnp_response(faker):
             msisdn = str(faker.random_number(digits=12))
 
         if not ported:
-            ported = random.choice(['true', 'false'])
+            ported = random.choice([True, False])
 
         if not mcc:
             mcc = str(faker.random_number(digits=3))
