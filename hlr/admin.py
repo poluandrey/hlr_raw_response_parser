@@ -19,19 +19,22 @@ class TaskDetailAdmin(admin.ModelAdmin):
     list_display = [
         'id',
         'task',
+        'request_id',
         'external_product_id',
         'msisdn',
         'result',
         'mccmnc',
         'ported',
+        'presents',
+        'roaming',
         'message',
         'http_error_code',
     ]
 
-# @admin.register(HlrProduct)
-# class HlrProductAdmin(admin.ModelAdmin):
-#     list_display = [
-#         'id',
-#         'external_product_id',
-#         'type',
-#     ]
+@admin.register(HlrProduct)
+class HlrProductAdmin(admin.ModelAdmin):
+    list_display = [
+        'id',
+        'product',
+        'type',
+    ]

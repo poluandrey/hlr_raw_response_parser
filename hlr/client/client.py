@@ -10,6 +10,7 @@ from hlr.client.schemas import HlrResponse
 def handle_hlr_response(hlr_response: dict[str, Any]) -> HlrResponse:
     hlr_resp_result = hlr_response['result']
     if hlr_resp_result == 0:
+        print(hlr_response)
         return HlrResponse(**hlr_response)
 
     if hlr_resp_result == -2:
@@ -50,7 +51,6 @@ class HlrClient:
     ) -> HlrResponse:
         params = {'dnis': msisdn, 'source_name': provider}
         try:
-            # with self.client as s:
             resp = self.client.get('mccmnc_request', params=params)
             resp.raise_for_status()
             hlr_resp = resp.json()

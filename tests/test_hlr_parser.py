@@ -35,7 +35,7 @@ def test__get_msisdn_info__for_tmt_hlr_parser_return_correct_mccmnc(make_tmt_hlr
 @pytest.mark.parametrize('hlr_present_resp, present', [('yes', True), ('no', False), ('na', None)])
 def test__get_msisdn_info__for_tmt_hlr_parser_return_correct_present(make_tmt_hlr_response, hlr_present_resp, present):
     parser = create_parser(HlrParserType.TMT_HLR)
-    msisdn_info = parser.get_msisdn_info(make_tmt_hlr_response(present=hlr_present_resp))
+    msisdn_info = parser.get_msisdn_info(make_tmt_hlr_response(presents=hlr_present_resp))
 
     assert msisdn_info.presents == present
 

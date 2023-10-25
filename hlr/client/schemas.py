@@ -10,4 +10,4 @@ class HlrResponse(BaseModel):
     ported: int
     cached: int
     context_log: str
-    message: str
+    message: str | None = Field(default=None)

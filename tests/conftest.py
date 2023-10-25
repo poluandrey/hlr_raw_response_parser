@@ -5,6 +5,7 @@ from pytest import fixture
 
 from hlr.client.client import HlrClient
 from hlr.client.schemas import HlrResponse
+from hlr.parser.hlr_parser import HlrParserType, MsisdnInfo
 from hlr.tasks import Task
 
 
@@ -35,12 +36,12 @@ def context_log_not_serializable_raw_response():
 
 @fixture()
 def make_tmt_hlr_response(faker):
-    def tmt_hlr_response(msisdn: int | None = None,
-                         mcc: str | None = None,
-                         mnc: str | None = None,
-                         present: str | None = None,
-                         ported: str | None = None,
-                         ):
+    def inner(msisdn: int | None = None,
+              mcc: str | None = None,
+              mnc: str | None = None,
+              presents: str | None = None,
+              ported: str | None = None,
+              ):
         if not msisdn:
             msisdn = faker.random_number(digits=13)
 
@@ -50,37 +51,37 @@ def make_tmt_hlr_response(faker):
         if not mnc:
             mnc = str(faker.random_number(digits=2))
 
-        if not present:
-            present = random.choice(['yes', 'no', 'na'])
+        if not presents:
+            presents = random.choice(['yes', 'no', 'na'])
 
         if not ported:
             ported = random.choice([True, False])
 
         return {
             msisdn:
-            {
-                'cic': faker.pystr(),
-                'error': faker.random_number(digits=3),
-                'imsi': str(faker.random_number(digits=5)) + '0' * 8,
-                'mcc': mcc,
-                'mnc': mnc,
-                'network': faker.pystr(),
-                'number': msisdn,
-                'ported': ported,
-                'present': present,
-                'status': faker.random_number(digits=1),
-                'status_message': faker.pystr(),
-                'type': faker.pystr(),
-                'trxid': faker.pystr(),
-            },
+                {
+                    'cic': faker.pystr(),
+                    'error': faker.random_number(digits=3),
+                    'imsi': str(faker.random_number(digits=5)) + '0' * 8,
+                    'mcc': mcc,
+                    'mnc': mnc,
+                    'network': faker.pystr(),
+                    'number': msisdn,
+                    'ported': ported,
+                    'presents': presents,
+                    'status': faker.random_number(digits=1),
+                    'status_message': faker.pystr(),
+                    'type': faker.pystr(),
+                    'trxid': faker.pystr(),
+                },
         }
 
-    return tmt_hlr_response
+    return inner
 
 
 @fixture()
 def make_infobip_hlr_response(faker):
-    def infobip_hlr_response(
+    def inner(
             ported: bool | None = None,
             roaming: bool | None = None,
             present: str | None = None,
@@ -104,45 +105,45 @@ def make_infobip_hlr_response(faker):
 
         return {
             'results':
-            [
-                {
-                    'to': msisdn,
-                    'mccMnc': mccmnc,
-                    'imsi': str(faker.random_number(digits=15)),
-                    'originalNetwork': {
-                        'networkName': faker.pystr(),
-                        'networkPrefix': str(faker.random_number(digits=5)),
-                        'countryName': faker.pystr(),
-                        'countryPrefix': str(faker.random_number(digits=3)),
-                        'networkId': faker.random_number(digits=5),
+                [
+                    {
+                        'to': msisdn,
+                        'mccMnc': mccmnc,
+                        'imsi': str(faker.random_number(digits=15)),
+                        'originalNetwork': {
+                            'networkName': faker.pystr(),
+                            'networkPrefix': str(faker.random_number(digits=5)),
+                            'countryName': faker.pystr(),
+                            'countryPrefix': str(faker.random_number(digits=3)),
+                            'networkId': faker.random_number(digits=5),
+                        },
+                        'ported': ported,
+                        'roaming': roaming,
+                        'status': {
+                            'groupId': faker.random_number(digits=1),
+                            'groupName': present,
+                            'id': faker.random_number(digits=1),
+                            'name': faker.pystr(),
+                            'description': faker.pystr(),
+                        },
+                        'error': {
+                            'groupId': faker.random_number(digits=1),
+                            'groupName': faker.pystr(),
+                            'id': faker.random_number(digits=1),
+                            'name': faker.pystr(),
+                            'description': faker.pystr(),
+                        },
+                        'permanent': faker.pystr(),
                     },
-                    'ported': ported,
-                    'roaming': roaming,
-                    'status': {
-                        'groupId': faker.random_number(digits=1),
-                        'groupName': present,
-                        'id': faker.random_number(digits=1),
-                        'name': faker.pystr(),
-                        'description': faker.pystr(),
-                    },
-                    'error': {
-                        'groupId': faker.random_number(digits=1),
-                        'groupName': faker.pystr(),
-                        'id': faker.random_number(digits=1),
-                        'name': faker.pystr(),
-                        'description': faker.pystr(),
-                    },
-                    'permanent': faker.pystr(),
-                },
-            ],
+                ],
         }
 
-    return infobip_hlr_response
+    return inner
 
 
 @fixture()
 def make_xconnect_mnp_response(faker):
-    def xconnect_mnp_response(
+    def inner(
             msisdn: str | None = None,
             ported: str | None = None,
             mcc: str | None = None,
@@ -172,12 +173,12 @@ def make_xconnect_mnp_response(faker):
             'nt': faker.pystr(),
         }
 
-    return xconnect_mnp_response
+    return inner
 
 
 @fixture()
 def make_xconnect_hlr_response(faker):
-    def xconnect_hlr_response(
+    def inner(
             msisdn: str | None = None,
             mcc: str | None = None,
             mnc: str | None = None,
@@ -213,7 +214,7 @@ def make_xconnect_hlr_response(faker):
             'rc': str(faker.random_number(digits=3)),
         }
 
-    return xconnect_hlr_response
+    return inner
 
 
 @fixture()
@@ -239,7 +240,7 @@ def hlr_response_vendor_not_found():
 
 
 @fixture()
-def hlr_response_successful_for_tmt_hlr():
+def hlr_response_successful_for_tmt_hlr(context_log_valid):
     return {
         'message_id': 'b13439c5-3811-40b4-a001-531892df114c',
         'mccmnc': '250001',
@@ -253,7 +254,7 @@ def hlr_response_successful_for_tmt_hlr():
         'cached': 0,
         'error': 'na',
         'login': 'alaris',
-        'context_log': r'{\"startTime\":\"2023-10-02 10:33:37\",\"contextLog\":[\"s:2023-10-02 10:33:37 d:PT0S t:epollEventLoopGroup-6-20 i:Starting\",\"s:2023-10-02 10:33:37 d:PT0S t:HlrExecutor-pool-6-thread-84 i: \=79216503431. prefix\=null process time sec.\=PT0S mccmnc\=null fullMatched\=false ownerID\=null providerResponseCode\=null mode\=EXACTLY\",\"s:2023-10-02 10:33:37 d:PT0.001S t:HlrExecutor-pool-6-thread-84 i: \=79216503431 prefix\=null process time sec.\=PT-0.001S mccmnc\=null fullMatched\=false ownerID\=null providerResponseCode\=null mode\=EXACTLY\",\"s:2023-10-02 10:33:37 d:PT0.001S t:HlrExecutor-pool-6-thread-84 i: \=. prefix\=null process time sec.\=PT0S mccmnc\=null fullMatched\=false ownerID\=null providerResponseCode\=null mode\=EXACTLY\",\"s:2023-10-02 10:33:37 d:PT0.001S t:HlrExecutor-pool-6-thread-84 i:Processing: 79216503431 HLR vendor: tmtlive cacheTtl: 14400\",\"s:2023-10-02 10:33:37 d:PT0.001S t:HlrExecutor-pool-6-thread-84 i:Process request, source: tmtlive, dnis: 79216503431, cachedRawResponse: null\",\"s:2023-10-02 10:33:37 d:PT0.001S t:HlrExecutor-pool-6-thread-84 i:request link1: https://api.tmtvelocity.com/live/json/ZspUQp2a4xYX7/Z7K4xEX5YwGD7v7/[dnis]\",\"s:2023-10-02 10:33:37 d:PT0.018S t:AsyncHttpClient-43-9 i:first raw response: {\\n  \\\"79216503431\\\": {\\n    \\\"cic\\\": \\\"7629\\\",\\n    \\\"error\\\": 191,\\n    \\\"imsi\\\": \\\"25001XXXXXXXXXX\\\",\\n    \\\"mcc\\\": \\\"250\\\",\\n    \\\"mnc\\\": \\\"01\\\",\\n    \\\"network\\\": \\\"Mobilnyye TeleSistemy pjsc (MTS)\\\",\\n    \\\"number\\\": 79216503431,\\n    \\\"ported\\\": true,\\n    \\\"presents\\\": \\\"na\\\",\\n    \\\"status\\\": 0,\\n    \\\"status_message\\\": \\\"Success\\\",\\n    \\\"type\\\": \\\"mobile\\\",\\n    \\\"trxid\\\": \\\"EfwonAB\\\"\\n  }\\n}\",\"s:2023-10-02 10:33:37 d:PT0.018S t:AsyncHttpClient-43-9 i:Caching raw response with cacheTtl: 14405\",\"s:2023-10-02 10:33:37 d:PT0.018S t:AsyncHttpClient-43-9 i:Result is Ok, setCompleted\",\"s:2023-10-02 10:33:37 d:PT0.018S t:AsyncHttpClient-43-9 i:Finishing\"]}',
+        'context_log': context_log_valid,
         'provider_ttl': 14400,
         'providerResponseCode': 'na',
     }
@@ -297,7 +298,21 @@ def hlr_response_hlr_proxy_internal_error_contain_error():
 
 @fixture()
 def hlr_task():
-    return Task(provider='any_provider', msisdn='79999999999')
+    return Task(provider_name='any_provider',
+                msisdn='79999999999',
+                provider_type=HlrParserType.TMT_HLR.name)
+
+
+@fixture()
+def successfully_handled_response(faker):
+    return MsisdnInfo(
+        msisdn=str(faker.random_number(digits=12)),
+        mccmnc=str(faker.random_number(digits=6)),
+        ported=random.choice([True, False, None]),
+        presents=random.choice([True, False, None]),
+        roaming=random.choice([True, False, None]),
+        request_id=faker.pystr()
+    )
 
 
 @fixture()

@@ -15,7 +15,6 @@ from hlr.models import Task as HlrTask, TaskDetail
 from hlr.tasks import celery_task_handler, Task
 
 
-
 class TaskView(GenericViewSet, CreateModelMixin, ListModelMixin, RetrieveModelMixin):
     queryset = HlrTask.objects.all()
     serializer_class = TaskRetrieveSerializer
@@ -30,17 +29,10 @@ class TaskView(GenericViewSet, CreateModelMixin, ListModelMixin, RetrieveModelMi
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         task = HlrTask.objects.create(author=serializer.validated_data['author'])
-        hlr_products = Product.objects.filter(external_product_id__in=serializer.validated_data['external_product_id'])
-
-        for msisdn, hlr_product in product(serializer.validated_data['msisdn'], hlr_products):
-            TaskDetail.objects.create(
-                task=task,
-                external_product_id=hlr_product,
-                msisdn=msisdn,
-            )
-            hlr_task = Task(msisdn=msisdn, provider=hlr_product.description)
-            celery_task_handler(task=hlr_task)
-
+        celery_task_handler(task=task,
+                            msisdns=serializer.validated_data['msisdn'],
+                            hlr_products_external_id=serializer.validated_data['external_product_id']
+                            )
         return Response({'id': task.id}, status=status.HTTP_201_CREATED)
 
     @action(methods=['get'], detail=True)
