@@ -78,57 +78,64 @@ def convert_from_hlr_failed_response(
 def handle_task(
         task: Task,
         hlr_client: HlrClient,
-) -> tuple[MsisdnInfo, HlrFailedResponse]:
+) -> tuple[MsisdnInfo | None, HlrFailedResponse | None]:
     msisdn_info, hlr_error = None, None
     try:
         hlr_response = hlr_client.get_mccmnc_info(msisdn=task.msisdn, provider=task.provider_name)
         parser = create_parser(HlrParserType[task.provider_type])
         context_log = parse_context_log(hlr_response.context_log)
         msisdn_info = parser.get_msisdn_info(context_log)
-        msisdn_info.request_id = hlr_response.message_id if hlr_response.message_id else str(uuid.uuid4())
+        msisdn_info.request_id = hlr_response.message_id if (
+            hlr_response.message_id
+        ) else str(uuid.uuid4())
     except HlrVendorNotFoundError as error:
         hlr_error = convert_from_hlr_error(error, msisdn=task.msisdn, provider=task.provider_name)
     except HlrProxyError as error:
         hlr_error = convert_from_hlr_error(error, msisdn=task.msisdn, provider=task.provider_name)
     except HlrClientHTTPError as error:
-        hlr_error = convert_from_hlr_http_error(error, msisdn=task.msisdn, provider=task.provider_name)
+        hlr_error = convert_from_hlr_http_error(error,
+                                                msisdn=task.msisdn,
+                                                provider=task.provider_name,
+                                                )
 
     return msisdn_info, hlr_error
 
 
 @shared_task()
-def celery_task_handler(task: DbTask, msisdns: list[str], hlr_products_external_id: list[str]) -> None:
-    hlr_client = HlrClient(login=settings.HLR_LOGIN, password=settings.HLR_PASSWORD, base_url=settings.HLR_BASE_URL)
+def celery_task_handler(task: DbTask,
+                        msisdns: list[str],
+                        hlr_products_external_id: list[str],
+                        ) -> None:
+    hlr_client = HlrClient(login=settings.HLR_LOGIN,
+                           password=settings.HLR_PASSWORD,
+                           base_url=settings.HLR_BASE_URL,
+                           )
     hlr_products = Product.objects.select_related('hlr').filter(
-        external_product_id__in=hlr_products_external_id
-        )
+        external_product_id__in=hlr_products_external_id,
+    )
     for msisdn, hlr_product in product(msisdns, hlr_products):
         task_detail = TaskDetail.objects.create(
             task=task,
             external_product_id=hlr_product,
             msisdn=msisdn,
         )
-        hlr_task = Task(msisdn=msisdn, provider_name=hlr_product.description, provider_type=hlr_product.hlr.type)
+        hlr_task = Task(msisdn=msisdn,
+                        provider_name=hlr_product.description,
+                        provider_type=hlr_product.hlr.type,
+                        )
         msisdn_info, error = handle_task(hlr_task, hlr_client)
         if msisdn_info:
             task_detail.result = 0
-            task_detail.request_id = msisdn_info    .request_id
+            task_detail.request_id = msisdn_info.request_id
             task_detail.mccmnc = msisdn_info.mccmnc
             task_detail.ported = msisdn_info.ported
             task_detail.roaming = msisdn_info.roaming
             task_detail.presents = msisdn_info.presents
             task_detail.save()
             return
+
         if error:
             task_detail.result = error.result
             task_detail.message = error.message
             task_detail.request_id = error.message_id
             task_detail.http_error_code = error.http_error
-
-
-
-
-
-
-
-

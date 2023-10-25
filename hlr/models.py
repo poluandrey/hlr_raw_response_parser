@@ -63,5 +63,6 @@ class HlrProduct(models.Model):
         to_field='external_product_id',
         related_name='hlr',
     )
-    type = models.CharField(choices=[(hlr_parser.name, hlr_parser) for hlr_parser in HlrParserType])
-
+    type = models.CharField(
+        choices=[(hlr_parser.name, hlr_parser) for hlr_parser in HlrParserType],
+    )

@@ -4,7 +4,7 @@ from hlr.models import Task, TaskDetail, HlrProduct
 
 
 @admin.register(Task)
-class TaskAdmin(admin.ModelAdmin):
+class TaskAdmin(admin.ModelAdmin[Task]):
     list_display = [
         'id',
         'status',
@@ -30,6 +30,7 @@ class TaskDetailAdmin(admin.ModelAdmin):
         'message',
         'http_error_code',
     ]
+
 
 @admin.register(HlrProduct)
 class HlrProductAdmin(admin.ModelAdmin):

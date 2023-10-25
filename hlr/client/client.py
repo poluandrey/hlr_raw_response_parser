@@ -10,7 +10,6 @@ from hlr.client.schemas import HlrResponse
 def handle_hlr_response(hlr_response: dict[str, Any]) -> HlrResponse:
     hlr_resp_result = hlr_response['result']
     if hlr_resp_result == 0:
-        print(hlr_response)
         return HlrResponse(**hlr_response)
 
     if hlr_resp_result == -2:

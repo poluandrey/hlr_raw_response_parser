@@ -1,6 +1,5 @@
 from rest_framework import serializers
 
-from alaris.models import Product
 from hlr.models import Task, TaskDetail
 
 

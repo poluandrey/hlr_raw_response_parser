@@ -311,7 +311,7 @@ def successfully_handled_response(faker):
         ported=random.choice([True, False, None]),
         presents=random.choice([True, False, None]),
         roaming=random.choice([True, False, None]),
-        request_id=faker.pystr()
+        request_id=faker.pystr(),
     )
 
 

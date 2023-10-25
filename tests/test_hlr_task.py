@@ -17,6 +17,7 @@ def test__handle_task__valid_client_response_was_append_correctly(
         assert successful
         assert fail is None
 
+
 def test__handle_task__invalid_client_response_was_append_correctly(
         hlr_client,
         hlr_task,

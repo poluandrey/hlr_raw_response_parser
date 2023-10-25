@@ -14,7 +14,7 @@ class MsisdnInfo(BaseModel):
     ported: bool | None
     presents: bool | None
     roaming: bool | None
-    request_id: str = Field(default=None)
+    request_id: str | None = Field(default=None)
 
 
 class HlrParser(Protocol):
@@ -46,7 +46,6 @@ class TmtHlrHlrParser(HlrParser):
 
     def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
         msisdn = list(raw_response.keys())[0]
-        print(raw_response)
         hlr_response = TmtHlrResponse(**raw_response[msisdn])
         return MsisdnInfo(
             msisdn=str(hlr_response.msisdn),
@@ -56,11 +55,13 @@ class TmtHlrHlrParser(HlrParser):
             roaming=None,
         )
 
-    def parse_presents(self, presents):
+    def parse_presents(self, presents: str) -> bool | None:
         if presents == 'na':
             return None
+
         if presents == 'yes':
             return True
+
         return False
 
 
@@ -112,7 +113,7 @@ class InfobipHlrHlrParser:
             mccmnc=f'{mcc}0{mnc}',
             ported=ported,
             presents=present,
-            roaming=result.roaming
+            roaming=result.roaming,
         )
 
 
