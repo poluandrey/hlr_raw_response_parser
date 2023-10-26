@@ -8,8 +8,28 @@ from alaris.models import ProductType, Product, Carrier
 from hlr.client.client import HlrClient
 from hlr.client.schemas import HlrResponse
 from hlr.models import User, Task as ApiTask, HlrProduct, TaskDetail
-from hlr.parser.hlr_parser import HlrParserType, MsisdnInfo
+from hlr.parser.hlr_parser import HlrParserType, MsisdnInfo, create_parser
 from hlr.tasks import Task, HlrFailedResponse
+
+
+@fixture()
+def tmt_hlr_parser():
+    return create_parser(HlrParserType.TMT_HLR)
+
+
+@fixture()
+def xconnect_mnp_parser():
+    return create_parser(HlrParserType.XCONNECT_MNP)
+
+
+@fixture()
+def xconnect_hlr_parser():
+    return create_parser(HlrParserType.XCONNECT_HLR)
+
+
+@fixture()
+def infobip_hrl_parser():
+    return create_parser(HlrParserType.INFOBIP_HLR)
 
 
 @fixture()
