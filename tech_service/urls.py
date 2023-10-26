@@ -5,6 +5,7 @@ from drf_spectacular.views import (SpectacularAPIView, SpectacularRedocView,
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', include('system_tools.urls'))
 ]
 # DOCS
 urlpatterns += [

@@ -48,6 +48,7 @@ LOCAL_APPS = [
     'users',
     'alaris',
     'hlr',
+    'system_tools',
 ]
 
 INSTALLED_APPS = LOCAL_APPS + DJANGO_APPS + THIRD_PARTY_APPS
