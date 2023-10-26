@@ -146,7 +146,8 @@ def insert_successful_check(msisdn_info: MsisdnInfo, task_detail: TaskDetail) ->
 
 
 def create_task_detail_and_hlr_task(
-        hlr_task_data: product, task: DbTask
+        hlr_task_data: product,
+        task: DbTask,
 ) -> Generator[tuple[TaskDetail, Task], None, None]:
     for msisdn, hlr_product in hlr_task_data:
         task_detail = TaskDetail.objects.create(

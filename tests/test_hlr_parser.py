@@ -37,7 +37,8 @@ def test__get_msisdn_info__for_tmt_hlr_parser_return_correct_mccmnc(tmt_hlr_pars
 @pytest.mark.parametrize('hlr_present_resp, present', [('yes', True), ('no', False), ('na', None)])
 def test__get_msisdn_info__for_tmt_hlr_parser_return_correct_present(tmt_hlr_parser,
                                                                      make_tmt_hlr_response,
-                                                                     hlr_present_resp, present
+                                                                     hlr_present_resp,
+                                                                     present,
                                                                      ):
     raw_response = make_tmt_hlr_response(presents=hlr_present_resp)
 
@@ -49,7 +50,8 @@ def test__get_msisdn_info__for_tmt_hlr_parser_return_correct_present(tmt_hlr_par
 @pytest.mark.parametrize('hlr_ported_resp, ported', [('true', True), ('false', False)])
 def test__get_msisdn_info__for_tmt_hlr_parser_return_correct_ported(tmt_hlr_parser,
                                                                     make_tmt_hlr_response,
-                                                                    hlr_ported_resp, ported
+                                                                    hlr_ported_resp,
+                                                                    ported,
                                                                     ):
     raw_response = make_tmt_hlr_response(ported=hlr_ported_resp)
 
@@ -59,7 +61,7 @@ def test__get_msisdn_info__for_tmt_hlr_parser_return_correct_ported(tmt_hlr_pars
 
 
 def test__get_msisdn_info__for_infobip_parser_return_correct_msisdn(infobip_hrl_parser,
-                                                                    make_infobip_hlr_response
+                                                                    make_infobip_hlr_response,
                                                                     ):
     raw_response = make_infobip_hlr_response(msisdn='79216503431')
 
@@ -129,7 +131,8 @@ def test__get_msisdn_info__for_xconnect_hlr_return_correct_present(
         xconnect_hlr_parser,
         make_xconnect_hlr_response,
         hlr_present_resp,
-        presents):
+        presents,
+):
     raw_response = make_xconnect_hlr_response(presents=hlr_present_resp)
 
     msisdn_info = xconnect_hlr_parser.get_msisdn_info(raw_response)
@@ -161,7 +164,8 @@ def test__get_msisdn_info__fir_xconnect_mnp_return_correct_ported(
         xconnect_mnp_parser,
         make_xconnect_mnp_response,
         hlr_ported_resp,
-        ported):
+        ported,
+):
     raw_response = make_xconnect_mnp_response(ported=hlr_ported_resp)
 
     msisdn_info = xconnect_mnp_parser.get_msisdn_info(raw_response)

@@ -337,6 +337,7 @@ def successfully_handled_response(faker):
         request_id=faker.pystr(),
     )
 
+
 @fixture()
 def failed_handled_response(faker):
     return HlrFailedResponse(
@@ -345,7 +346,7 @@ def failed_handled_response(faker):
         message_id=faker.pystr(),
         message=faker.pystr(),
         provider=faker.pystr(),
-        http_error=faker.random_number(digits=3)
+        http_error=faker.random_number(digits=3),
     )
 
 
@@ -378,12 +379,13 @@ def task_create_payload(user):
 def task(db, user):
     return ApiTask.objects.create(author=user)
 
+
 @fixture()
 def task_detail(db, task, hlr_product):
     return TaskDetail.objects.create(
         task=task,
         external_product_id=hlr_product,
-        msisdn='79216503431'
+        msisdn='79216503431',
     )
 
 

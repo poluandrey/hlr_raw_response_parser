@@ -53,4 +53,3 @@ def test__insert_failed_check__insert_data_correctly(failed_handled_response, ta
     assert task_detail.request_id == failed_handled_response.message_id
     assert task_detail.message == failed_handled_response.message
     assert task_detail.http_error_code == failed_handled_response.http_error
-
