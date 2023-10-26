@@ -28,7 +28,7 @@ class TmtHlrHlrParser(HlrParser):
     {
     "79216503431": {
         "cic": "7629",
-        "error": 191,
+        "failed_response": 191,
         "imsi": "25001XXXXXXXXXX",
         "mcc": "250",
         "mnc": "01",
@@ -89,7 +89,7 @@ class InfobipHlrHlrParser:
           "name":"DELIVERED_TO_HANDSET",
           "description":"Message delivered to handset"
        },
-       "error":{
+       "failed_response":{
           "groupId":0,
           "groupName":"OK",
           "id":0,

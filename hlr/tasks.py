@@ -2,6 +2,7 @@ import dataclasses
 import uuid
 from dataclasses import dataclass
 from itertools import product
+from typing import Generator
 
 from django.conf import settings
 
@@ -57,7 +58,7 @@ def convert_from_hlr_http_error(
         msisdn=msisdn,
         provider=provider,
         result=-8,
-        message='Internal HTTP error',
+        message='Internal HTTP failed_response',
         http_error=error.error_code,
     )
 
@@ -113,7 +114,41 @@ def celery_task_handler(task: DbTask,
     hlr_products = Product.objects.select_related('hlr').filter(
         external_product_id__in=hlr_products_external_id,
     )
-    for msisdn, hlr_product in product(msisdns, hlr_products):
+    hlr_task_data = product(msisdns, hlr_products)
+    created_data = create_task_detail_and_hlr_task(hlr_task_data=hlr_task_data, task=task)
+    for task_detail, hlr_task in created_data:
+        msisdn_info, error = handle_task(hlr_task, hlr_client)
+        if msisdn_info:
+            insert_successful_check(msisdn_info, task_detail)
+
+        if error:
+            insert_failed_check(error, task_detail)
+
+    return
+
+
+def insert_failed_check(failed_response: HlrFailedResponse, task_detail: TaskDetail) -> None:
+    task_detail.result = failed_response.result
+    task_detail.message = failed_response.message
+    task_detail.request_id = failed_response.message_id
+    task_detail.http_error_code = failed_response.http_error
+    task_detail.save()
+
+
+def insert_successful_check(msisdn_info: MsisdnInfo, task_detail: TaskDetail) -> None:
+    task_detail.result = 0
+    task_detail.request_id = msisdn_info.request_id
+    task_detail.mccmnc = msisdn_info.mccmnc
+    task_detail.ported = msisdn_info.ported
+    task_detail.roaming = msisdn_info.roaming
+    task_detail.presents = msisdn_info.presents
+    task_detail.save()
+
+
+def create_task_detail_and_hlr_task(
+        hlr_task_data: product, task: DbTask
+) -> Generator[tuple[TaskDetail, Task], None, None]:
+    for msisdn, hlr_product in hlr_task_data:
         task_detail = TaskDetail.objects.create(
             task=task,
             external_product_id=hlr_product,
@@ -123,19 +158,4 @@ def celery_task_handler(task: DbTask,
                         provider_name=hlr_product.description,
                         provider_type=hlr_product.hlr.type,
                         )
-        msisdn_info, error = handle_task(hlr_task, hlr_client)
-        if msisdn_info:
-            task_detail.result = 0
-            task_detail.request_id = msisdn_info.request_id
-            task_detail.mccmnc = msisdn_info.mccmnc
-            task_detail.ported = msisdn_info.ported
-            task_detail.roaming = msisdn_info.roaming
-            task_detail.presents = msisdn_info.presents
-            task_detail.save()
-            return
-
-        if error:
-            task_detail.result = error.result
-            task_detail.message = error.message
-            task_detail.request_id = error.message_id
-            task_detail.http_error_code = error.http_error
+        yield task_detail, hlr_task

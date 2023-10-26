@@ -51,7 +51,7 @@ class TaskDetail(models.Model):
     message = models.CharField(max_length=200, null=True, blank=True)
     http_error_code = models.IntegerField(null=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (f'{self.pk} for {self.msisdn} via {self.external_product_id} '
                 f'created by {self.task.author}')
 

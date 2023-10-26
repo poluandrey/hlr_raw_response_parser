@@ -21,7 +21,7 @@ def handle_hlr_response(hlr_response: dict[str, Any]) -> HlrResponse:
 
     message = hlr_response.get('message')
     if not message:
-        message = hlr_response.get('error')
+        message = hlr_response.get('failed_response')
 
     raise HlrProxyInternalError(
         message=message,
