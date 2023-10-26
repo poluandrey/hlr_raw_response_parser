@@ -3,3 +3,8 @@
 .pytest_cache
 mypy_cache
 .data
+.env
+.env.default
+.git
+.gitignore
+.venv
