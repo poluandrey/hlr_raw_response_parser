@@ -19,6 +19,7 @@ class TaskDetailAdmin(admin.ModelAdmin):
     list_display = [
         'id',
         'task',
+        'status',
         'request_id',
         'external_product_id',
         'msisdn',

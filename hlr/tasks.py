@@ -111,19 +111,28 @@ def celery_task_handler(task: DbTask,
                            password=settings.HLR_PASSWORD,
                            base_url=settings.HLR_BASE_URL,
                            )
+    task.in_progress()
+    task.save()
     hlr_products = Product.objects.select_related('hlr').filter(
         external_product_id__in=hlr_products_external_id,
     )
     hlr_task_data = product(msisdns, hlr_products)
     created_data = create_task_detail_and_hlr_task(hlr_task_data=hlr_task_data, task=task)
     for task_detail, hlr_task in created_data:
+        task_detail.in_progress()
+        task_detail.save()
         msisdn_info, error = handle_task(hlr_task, hlr_client)
         if msisdn_info:
             insert_successful_check(msisdn_info, task_detail)
+            task_detail.ready()
+            task_detail.save()
 
         if error:
             insert_failed_check(error, task_detail)
-
+            task_detail.failed()
+            task_detail.save()
+    task.ready()
+    task.save()
     return
 
 

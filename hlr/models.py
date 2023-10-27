@@ -36,6 +36,7 @@ class Task(models.Model):
 
 class TaskDetail(models.Model):
     task = models.ForeignKey(Task, on_delete=models.PROTECT, related_name='details')
+    status = FSMField(default='new')
     external_product_id = models.ForeignKey(Product,
                                             on_delete=models.PROTECT,
                                             to_field='external_product_id',
@@ -55,6 +56,18 @@ class TaskDetail(models.Model):
         return (f'{self.pk} for {self.msisdn} via {self.external_product_id} '
                 f'created by {self.task.author}')
 
+    @transition(field=status, source='new', target='in progress')
+    def in_progress(self) -> None:
+        pass
+
+    @transition(field=status, source='in progress', target='failed')
+    def failed(self) -> None:
+        pass
+
+    @transition(field=status, source='in progress', target='ready')
+    def ready(self) -> None:
+        pass
+
 
 class HlrProduct(models.Model):
     product = models.OneToOneField(
@@ -66,3 +79,6 @@ class HlrProduct(models.Model):
     type = models.CharField(
         choices=[(hlr_parser.name, hlr_parser) for hlr_parser in HlrParserType],
     )
+
+    def __str__(self):
+        return f'{self.product.caption}'
