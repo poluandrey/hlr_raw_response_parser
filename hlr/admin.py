@@ -28,6 +28,7 @@ class TaskAdmin(admin.ModelAdmin[Task]):
 
     def save_model(self, request, obj: Task, form, change):
         msisdn = form.cleaned_data['msisdn'].split(',')
+        form.instance.author = request.user
         super(TaskAdmin, self).save_model(request, obj, form, change)
         celery_task_handler(task=obj, msisdns=msisdn, hlr_products_external_id=form.cleaned_data['hlr'])
 

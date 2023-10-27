@@ -14,7 +14,7 @@ class TaskCreateForm(forms.ModelForm):
         model = Task
 
         fields = [
-            'author',
+            # 'author',
             'msisdn',
             'hlr',
         ]
