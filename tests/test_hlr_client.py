@@ -4,6 +4,7 @@ import respx
 from hlr.client.errors import (HlrClientHTTPError, HlrProxyInternalError,
                                HlrVendorNotFoundError)
 from hlr.client.schemas import HlrResponse
+from tests.raw_responses import valid_context_log_str
 
 
 def test__hlr_client_get_mccmnc_info__raise_error_when_vendor_not_found(hlr_client,
@@ -49,7 +50,7 @@ def test__hlr_client_get_mccmnc_info__return_hlr_response_instance(hlr_client,
 
 def test__hlr_client_get_mccmnc_info__hlr_response_contain_required_data(hlr_client,
                                                                          hlr_response_successful_for_tmt_hlr,
-                                                                         context_log_valid):
+                                                                         ):
     provider = 'provider_name'
     msisdn = '7911036721995'
 
@@ -66,7 +67,7 @@ def test__hlr_client_get_mccmnc_info__hlr_response_contain_required_data(hlr_cli
         assert hlr_response.source_name == 'tmt_hlr'
         assert hlr_response.cached == 0
         assert hlr_response.mccmnc == '250001'
-        assert hlr_response.context_log == context_log_valid
+        assert hlr_response.context_log == valid_context_log_str
 
 
 def test__hlr_client_get_mccmnc_info__raise_internal_hlr_proxy_error(
