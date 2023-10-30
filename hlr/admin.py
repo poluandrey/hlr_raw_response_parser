@@ -23,6 +23,7 @@ class TaskAdmin(admin.ModelAdmin[Task]):
         defaults = {}
         if obj is None:
             defaults['form'] = TaskCreateForm
+
         defaults.update(kwargs)
         return super().get_form(request, obj, **defaults)
 
@@ -30,7 +31,10 @@ class TaskAdmin(admin.ModelAdmin[Task]):
         msisdn = form.cleaned_data['msisdn'].split(',')
         form.instance.author = request.user
         super(TaskAdmin, self).save_model(request, obj, form, change)
-        celery_task_handler(task=obj, msisdns=msisdn, hlr_products_external_id=form.cleaned_data['hlr'])
+        celery_task_handler(task=obj,
+                            msisdns=msisdn,
+                            hlr_products_external_id=form.cleaned_data['hlr'],
+                            )
 
 
 @admin.register(TaskDetail)

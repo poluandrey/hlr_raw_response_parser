@@ -111,7 +111,6 @@ def celery_task_handler(task: DbTask,
                            password=settings.HLR_PASSWORD,
                            base_url=settings.HLR_BASE_URL,
                            )
-    print('run')
     task.in_progress()
     task.save()
     hlr_products = Product.objects.select_related('hlr').filter(
@@ -132,13 +131,13 @@ def celery_task_handler(task: DbTask,
             insert_failed_check(error, task_detail)
             task_detail.failed()
             task_detail.save()
+
     task.ready()
     task.save()
     return
 
 
 def insert_failed_check(failed_response: HlrFailedResponse, task_detail: TaskDetail) -> None:
-    print(failed_response)
     task_detail.result = failed_response.result
     task_detail.message = failed_response.message
     task_detail.request_id = failed_response.message_id
