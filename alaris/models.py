@@ -3,7 +3,7 @@ from django.db import models
 
 
 class ProductType(models.Model):
-    external_product_type_id = models.PositiveIntegerField()
+    external_product_type_id = models.PositiveIntegerField(unique=True)
     name = models.CharField(max_length=120)
     insert_time = models.DateTimeField(auto_now_add=True)
     last_update_time = models.DateTimeField(auto_now=True)
@@ -13,7 +13,7 @@ class ProductType(models.Model):
 
 
 class Carrier(models.Model):
-    external_carrier_id = models.PositiveIntegerField()
+    external_carrier_id = models.PositiveIntegerField(unique=True)
     name = models.CharField(max_length=120)
     is_active = models.BooleanField()
     insert_time = models.DateTimeField(auto_now_add=True)
@@ -29,6 +29,7 @@ class Product(models.Model):
     external_account_id = models.PositiveIntegerField()
     carrier = models.ForeignKey(
         Carrier,
+        to_field='external_carrier_id',
         on_delete=models.PROTECT,
         related_name='products',
     )
@@ -44,6 +45,7 @@ class Product(models.Model):
     notes = models.CharField(max_length=120, blank=True)
     type = models.ForeignKey(
         ProductType,
+        to_field='external_product_type_id',
         on_delete=models.PROTECT,
         related_name='products',
     )
