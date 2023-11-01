@@ -21,7 +21,7 @@ def handle_hlr_response(hlr_response: dict[str, Any]) -> HlrResponse:
 
     message = hlr_response.get('message')
     if not message:
-        message = hlr_response.get('error')
+        message = hlr_response.get('failed_response')
 
     raise HlrProxyInternalError(
         message=message,
@@ -50,7 +50,6 @@ class HlrClient:
     ) -> HlrResponse:
         params = {'dnis': msisdn, 'source_name': provider}
         try:
-            # with self.client as s:
             resp = self.client.get('mccmnc_request', params=params)
             resp.raise_for_status()
             hlr_resp = resp.json()

@@ -36,29 +36,49 @@ class Task(models.Model):
 
 class TaskDetail(models.Model):
     task = models.ForeignKey(Task, on_delete=models.PROTECT, related_name='details')
+    status = FSMField(default='new')
     external_product_id = models.ForeignKey(Product,
                                             on_delete=models.PROTECT,
                                             to_field='external_product_id',
                                             related_name='tasks',
                                             )
+    request_id = models.CharField(null=True)
     msisdn = models.CharField(max_length=20, blank=False)
     result = models.IntegerField(null=True)
     mccmnc = models.CharField(max_length=6, null=True, blank=True)
-    ported = models.CharField(max_length=10)
+    ported = models.BooleanField(null=True)
+    roaming = models.BooleanField(null=True)
+    presents = models.BooleanField(null=True)
     message = models.CharField(max_length=200, null=True, blank=True)
     http_error_code = models.IntegerField(null=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (f'{self.pk} for {self.msisdn} via {self.external_product_id} '
                 f'created by {self.task.author}')
 
+    @transition(field=status, source='new', target='in progress')
+    def in_progress(self) -> None:
+        pass
 
-# модель пока не заработала
+    @transition(field=status, source='in progress', target='failed')
+    def failed(self) -> None:
+        pass
+
+    @transition(field=status, source='in progress', target='ready')
+    def ready(self) -> None:
+        pass
+
+
 class HlrProduct(models.Model):
-    external_product_id = models.ForeignKey(
+    product = models.OneToOneField(
         Product,
         on_delete=models.RESTRICT,
-        to_field='external_product_id'
+        to_field='external_product_id',
+        related_name='hlr',
     )
-    # type = models.CharField(choices=HlrParserType)
+    type = models.CharField(
+        choices=[(hlr_parser.name, hlr_parser) for hlr_parser in HlrParserType],
+    )
 
+    def __str__(self):
+        return f'{self.product.caption}'

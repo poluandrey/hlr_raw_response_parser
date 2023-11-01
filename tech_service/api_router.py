@@ -9,7 +9,7 @@ if settings.DEBUG:
 else:
     router = SimpleRouter()
 
-router.register('task', TaskView)
+router.register('task', TaskView, basename='task')
 router.register('hlr-request', TaskDetailListView)
 router.register('product', ProductView)
 

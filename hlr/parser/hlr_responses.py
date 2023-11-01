@@ -18,8 +18,8 @@ class TmtHlrResponse(BaseModel):
     mcc: str
     mnc: str
     network: str
-    ported: bool | str
-    present: str
+    ported: bool
+    presents: str
     type: str
 
 

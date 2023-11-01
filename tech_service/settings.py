@@ -1,6 +1,10 @@
 from pathlib import Path
 
 import environ
+import django_stubs_ext
+
+
+django_stubs_ext.monkeypatch()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,6 +48,7 @@ LOCAL_APPS = [
     'users',
     'alaris',
     'hlr',
+    'system_tools',
 ]
 
 INSTALLED_APPS = LOCAL_APPS + DJANGO_APPS + THIRD_PARTY_APPS
@@ -169,3 +174,9 @@ SPECTACULAR_SETTINGS = {
 # CELERY
 CELERY_BROKER_URL = 'redis://redis:6379'
 CELERY_RESULT_BACKEND = 'redis://redis:6379'
+
+
+# ALARIS HLR
+HLR_LOGIN = env('HLR_SERVICE_LOGIN')
+HLR_PASSWORD = env('HLR_SERVICE_PASSWORD')
+HLR_BASE_URL = env('HLR_SERVICE_BASE_URL')
