@@ -5,8 +5,9 @@ from unittest import mock
 
 from pytest import fixture
 
-from alaris.enterprise_api.client import EnterpriseApiClient
-from alaris.models import ProductType, Product, Carrier
+from alaris.enterprise_api.client import EnterpriseClient
+from alaris.enterprise_api.schema import JsonRpcResponse, Carrier
+from alaris.models import ProductType, Product, Carrier as DBCarrier
 from hlr.client.client import HlrClient
 from hlr.client.schemas import HlrResponse
 from hlr.models import User, Task as ApiTask, HlrProduct, TaskDetail
@@ -406,8 +407,8 @@ def hlr_product(db, faker):
         external_product_type_id=7,
         name='HLR',
     )
-    carrier = Carrier.objects.create(
-        external_carrier_id=faker.random_number(),
+    carrier = DBCarrier.objects.create(
+        external_carrier_id=1,
         name=faker.pystr(),
         is_active=True,
 
@@ -444,10 +445,9 @@ def make_hlr_task_data(db, faker, hlr_product):
     return inner
 
 
-@fixture()
-def enterprise_client():
-    client = EnterpriseApiClient(url='https://example.com/eapi')
-    return client
+@fixture
+def enterprise_client(faker):
+    return EnterpriseClient(auth=faker.pystr(), base_url='https://eapi.lancktele.com/')
 
 
 @fixture()
@@ -455,67 +455,97 @@ def make_enterprise_api_body(faker):
     def inner(request_type: str, valid: bool = True):
         if request_type == 'get_carrier_list' and valid:
             return {
-                "id": faker.random_number(),
-                "jsonrpc": faker.pystr(),
-                "method": faker.pystr(),
-                "params": {
-                    "name": faker.pystr(),
-                    "args": {"car_id": faker.random_number()},
-                    "auth": faker.pystr()
-                }
+                'id': faker.random_number(),
+                'jsonrpc': faker.pystr(),
+                'method': faker.pystr(),
+                'params': {
+                    'name': faker.pystr(),
+                    'args': {'car_id': faker.random_number()},
+                    'auth': faker.pystr(),
+                },
             }
+
         if request_type == 'get_carrier_list' and not valid:
             return {
-                "invalid_field": faker.random_number(),
-                "jsonrpc": faker.pystr(),
-                "method": faker.pystr(),
-                "params": {
-                    "name": faker.pystr(),
-                    "args": {"car_id": faker.random_number()},
-                    "auth": faker.pystr()
-                }
+                'invalid_field': faker.random_number(),
+                'jsonrpc': faker.pystr(),
+                'method': faker.pystr(),
+                'params': {
+                    'name': faker.pystr(),
+                    'args': {'car_id': faker.random_number()},
+                    'auth': faker.pystr(),
+                },
             }
 
     return inner
 
+
 @fixture()
 def make_enterprise_api_response(faker):
-    def inner(response_type: str, is_successfully: bool = True) -> dict[str, Any]:
-        if response_type == 'carrier_list' and is_successfully:
+    def inner(method: str, is_successfully: bool = True) -> dict[str, Any]:
+        if not is_successfully:
             return {
-                "jsonrpc": "2.0",
-                "result": {
-                    "data": [
-                        {
-                            "car_address": faker.pystr(),
-                            "car_cc_id": faker.random_number(),
-                            "car_comments": faker.pystr(),
-                            "car_id": faker.random_number(),
-                            "car_inbound_allowed": faker.random_number(),
-                            "car_is_active": faker.random_number(),
-                            "car_name": faker.pystr(),
-                            "car_outbound_allowed": faker.random_number(),
-                            "car_region_id": faker.pystr(),
-                            "car_test": faker.pystr(),
-                            "car_trusted_customer": faker.random_number(),
-                            "country_name": faker.pystr(),
-                            "have_client_prods": faker.random_number(),
-                            "have_vendor_prods": faker.random_number()
-                        }
-                    ]
+                'jsonrpc': '2.0',
+                'error': {
+                    'code': -32000,
+                    'message': 'rpc: can\'t find method \'Enterprise.Cursor1\'',
+                    'data': None,
                 },
-                "id": 10
+                'id': '10',
             }
 
-        if response_type == 'carrier_list' and not is_successfully:
+        if method == 'get_carrier_list':
             return {
-                "jsonrpc": "2.0",
-                "error": {
-                    "code": -32000,
-                    "message": "rpc: can't find method \"Enterprise.Cursor1\"",
-                    "data": None
+                'jsonrpc': '2.0',
+                'result': {
+                    'data': [
+                        {
+                            'car_address': faker.pystr(),
+                            'car_cc_id': faker.random_number(),
+                            'car_comments': faker.pystr(),
+                            'car_id': faker.random_number(),
+                            'car_inbound_allowed': faker.random_number(),
+                            'car_is_active': faker.random_number(),
+                            'car_name': faker.pystr(),
+                            'car_outbound_allowed': faker.random_number(),
+                            'car_region_id': faker.random_number(),
+                            'car_test': faker.random_number(),
+                            'car_trusted_customer': faker.random_number(),
+                            'country_name': faker.pystr(),
+                            'have_client_prods': faker.random_number(),
+                            'have_vendor_prods': faker.random_number(),
+                        },
+                    ],
                 },
-                "id": 10
+                'id': '10',
             }
+
+        if method == 'any_valid_method':
+            return {
+                'jsonrpc': '2.0',
+                'result': {
+                    'data': [
+                        {},
+                    ],
+                },
+                'id': '10',
+            }
+
+    return inner
+
+
+@fixture()
+def mock_enterprise_cursor_exec():
+    with mock.patch('alaris.enterprise_api.client.EnterpriseCursor.exec') as mock_exec:
+        yield mock_exec
+
+
+@fixture()
+def make_exec_response(make_enterprise_api_response):
+    def inner(method: str):
+
+        if method == 'get_carrier_list':
+            api_response = make_enterprise_api_response(method=method)
+            return JsonRpcResponse(**api_response)
 
     return inner

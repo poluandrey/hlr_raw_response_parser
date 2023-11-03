@@ -1,43 +1,27 @@
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict
 
 
-class RequestCarrierFilterArgs(BaseModel):
-    model_config = ConfigDict(extra='forbid')
-    car_id: int | None = None
-    have_client_prods: int | None = None
-    have_vendor_prods: int | None = None
-    car_inbound_allowed: int | None = None
-    car_outbound_allowed: int | None = None
-
-
-class RequestParam(BaseModel):
-    model_config = ConfigDict(extra='forbid')
-    name: str
-    auth: str
-    args: RequestCarrierFilterArgs | None = None
-
-
-class RequestBody(BaseModel):
-    model_config = ConfigDict(extra='forbid')
-    jsonrpc: str
-    id: int
-    method: str
-    params: RequestParam
-
-
-class ResponseBase(BaseModel):
-    model_config = ConfigDict(extra='forbid')
-    jsonrpc: str
-    id: int
-
-
-class ResponseErrorBase(ResponseBase):
+class JsonRpcError(BaseModel):
     code: int
     message: str
     data: None = None
 
 
-class ResponseCarrier(BaseModel):
+class ResultData(BaseModel):
+    data: list[dict[str, Any]] | None = None
+
+
+class JsonRpcResponse(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    jsonrpc: str
+    id: str
+    result: ResultData | None = None
+    error: JsonRpcError | None = None
+
+
+class Carrier(BaseModel):
     car_id: int
     car_cc_id: int
     car_address: str | None
@@ -52,11 +36,3 @@ class ResponseCarrier(BaseModel):
     country_name: str | None
     have_client_prods: int | None
     have_vendor_prods: int | None
-
-
-class ResponseResult(BaseModel):
-    data: list[ResponseCarrier]
-
-
-class ResponseCarrierListBase(ResponseBase):
-    result: ResponseResult
