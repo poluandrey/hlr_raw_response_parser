@@ -2,10 +2,12 @@ version: '3'
 
 services:
   django:
+    networks:
+      - djangonetwork
     build:
       context: .
     depends_on:
-      postgres:
+      db:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -30,16 +32,20 @@ services:
     build:
       context: .
     depends_on:
-      postgres:
+      db:
         condition: service_healthy
       django:
         condition: service_healthy
+    networks:
+      - djangonetwork
     env_file:
       - .env
     command: python manage.py migrate
 
-  postgres:
+  db:
     image: postgres:14
+    networks:
+      - djangonetwork
     ports:
       - "5432:5432"
     healthcheck:
@@ -54,6 +60,8 @@ services:
 
   redis:
     image: redis:7.2.2
+    networks:
+      - djangonetwork
     ports:
       - "6379:6379"
     healthcheck:
@@ -69,3 +77,9 @@ services:
     command: celery --app=tech_service worker --loglevel=debug
     depends_on:
       - redis
+    networks:
+      - djangonetwork
+
+networks:
+  djangonetwork:
+    driver: bridge

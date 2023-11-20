@@ -23,12 +23,12 @@ class TaskRetrieveSerializer(serializers.ModelSerializer[Task]):
 
 
 class TaskCreateSerializer(serializers.ModelSerializer[Task]):
-    external_product_id = ExternalHlrProviderListField()
+    external_id = ExternalHlrProviderListField()
     msisdn = MsisdnListField()
 
     class Meta:
         model = Task
-        fields = ['id', 'author', 'external_product_id', 'msisdn']
+        fields = ['id', 'author', 'external_id', 'msisdn']
 
 
 class TaskDetailSerializer(serializers.ModelSerializer[TaskDetail]):

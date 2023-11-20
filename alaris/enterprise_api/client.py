@@ -4,7 +4,7 @@ from typing import Any
 import httpx
 
 from alaris.enterprise_api.errors import EnterpriseApiError
-from alaris.enterprise_api.schema import JsonRpcResponse, Carrier
+from alaris.enterprise_api.schema import JsonRpcResponse, Carrier, Product
 
 
 class EnterpriseClient:
@@ -13,6 +13,7 @@ class EnterpriseClient:
         self.client = httpx.Client(base_url=base_url)
         self.enterprise_cursor = EnterpriseCursor(client=self.client, auth=auth)
         self.carrier = CarrierClient(enterprise_cursor=self.enterprise_cursor)
+        self.product = ProductClient(enterprise_cursor=self.enterprise_cursor)
 
 
 class EnterpriseCursor:
@@ -67,3 +68,19 @@ class CarrierClient:
             },
         )
         return [Carrier(**carrier) for carrier in payload.result.data]
+
+
+class ProductClient:
+
+    def __init__(self, enterprise_cursor: EnterpriseCursor) -> None:
+        self.cursor = enterprise_cursor
+
+    def get_all(self, product_type: str = 'hlr', product_direction: int = 1) -> list[Product]:
+        payload = self.cursor.exec(
+            method='get_product_list',
+            params={
+                'type': product_type,
+                'direction': product_direction
+            }
+        )
+        return [Product(**product) for product in payload.result.data]

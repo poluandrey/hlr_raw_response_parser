@@ -7,11 +7,13 @@ from typing import Generator
 from django.conf import settings
 
 from celery import shared_task
+from django.db.models import QuerySet
 from pydantic import Field
 
 from alaris.models import Product
-from hlr.models import TaskDetail, Task as DbTask
+from hlr.models import TaskDetail, Task as DbTask, HlrProduct as DbHlrProduct
 from hlr.parser.context_log_parser import parse_context_log
+from hlr.parser.errors import ContextLogParserError
 from hlr.parser.hlr_parser import create_parser, HlrParserType, MsisdnInfo
 from hlr.client.errors import (HlrClientError, HlrClientHTTPError,
                                HlrProxyError, HlrVendorNotFoundError)
@@ -98,30 +100,49 @@ def handle_task(
                                                 msisdn=task.msisdn,
                                                 provider=task.provider_name,
                                                 )
-
     return msisdn_info, hlr_error
 
 
 @shared_task()
-def celery_task_handler(task: DbTask,
+def celery_task_handler(task_id: int,
                         msisdns: list[str],
-                        hlr_products_external_id: list[str],
+                        hlr_products_external_id: list[int],
                         ) -> None:
     hlr_client = HlrClient(login=settings.HLR_LOGIN,
                            password=settings.HLR_PASSWORD,
                            base_url=settings.HLR_BASE_URL,
                            )
+    task = DbTask.objects.get(pk=task_id)
     task.in_progress()
     task.save()
-    hlr_products = Product.objects.select_related('hlr').filter(
-        external_product_id__in=hlr_products_external_id,
-    )
+
+    hlr_products = Product.objects.filter(pk__in=hlr_products_external_id)
     hlr_task_data = product(msisdns, hlr_products)
-    created_data = create_task_detail_and_hlr_task(hlr_task_data=hlr_task_data, task=task)
-    for task_detail, hlr_task in created_data:
+
+    for msisdn, hlr_product in hlr_task_data:
+        task_detail = TaskDetail.objects.create(
+            task=task,
+            product=hlr_product,
+            msisdn=msisdn,
+        )
+        hlr_task = Task(msisdn=msisdn,
+                        provider_name=hlr_product.description,
+                        provider_type=hlr_product.hlr.type,
+                        )
+
+
         task_detail.in_progress()
         task_detail.save()
-        msisdn_info, error = handle_task(hlr_task, hlr_client)
+        try:
+            msisdn_info, error = handle_task(hlr_task, hlr_client)
+        except ContextLogParserError as error:
+            # need to add logging
+            task_detail.failed()
+            task_detail.save()
+            task.ready()
+            task.save()
+            return
+
         if msisdn_info:
             insert_successful_check(msisdn_info, task_detail)
             task_detail.ready()
@@ -162,11 +183,11 @@ def create_task_detail_and_hlr_task(
     for msisdn, hlr_product in hlr_task_data:
         task_detail = TaskDetail.objects.create(
             task=task,
-            external_product_id=hlr_product,
+            external_product_id=hlr_product.product,
             msisdn=msisdn,
         )
         hlr_task = Task(msisdn=msisdn,
-                        provider_name=hlr_product.description,
-                        provider_type=hlr_product.hlr.type,
+                        provider_name=hlr_product.product.description,
+                        provider_type=hlr_product.product.type,
                         )
         yield task_detail, hlr_task

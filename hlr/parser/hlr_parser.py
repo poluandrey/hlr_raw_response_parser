@@ -51,19 +51,18 @@ class TmtHlrHlrParser(HlrParser):
             msisdn=str(hlr_response.msisdn),
             mccmnc=f'{hlr_response.mcc}0{hlr_response.mnc}',
             ported=hlr_response.ported,
-            presents=self.parse_presents(hlr_response.presents),
+            presents=self.parse_presents(hlr_response.present),
             roaming=None,
         )
 
     def parse_presents(self, presents: str) -> bool | None:
-        if presents == 'na':
-            return None
-
-        if presents == 'yes':
-            return True
-
-        return False
-
+        match presents:
+            case 'na':
+                return None
+            case 'yes':
+                return True
+            case _:
+                return False
 
 class InfobipHlrHlrParser:
     """

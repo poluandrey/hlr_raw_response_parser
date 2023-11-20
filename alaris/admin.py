@@ -7,7 +7,7 @@ from alaris.models import Carrier, Product, ProductType
 class ProductAdmin(admin.ModelAdmin):
     list_display = [
         'id',
-        'external_product_id',
+        'external_id',
         'account_currency_code',
         'external_account_id',
         'carrier',
@@ -25,7 +25,7 @@ class ProductAdmin(admin.ModelAdmin):
 class ProductType(admin.ModelAdmin):
     list_display = [
         'id',
-        'external_product_type_id',
+        'external_id',
         'name',
         'insert_time',
         'last_update_time',
@@ -36,7 +36,7 @@ class ProductType(admin.ModelAdmin):
 class CarrierAdmin(admin.ModelAdmin):
     list_display = [
         'id',
-        'external_carrier_id',
+        'external_id',
         'name',
         'is_active',
         'insert_time',

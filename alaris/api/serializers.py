@@ -8,7 +8,7 @@ class ProductSerializer(ModelSerializer):
     class Meta:
         model = Product
         fields = ['id',
-                  'external_product_id',
+                  'external_id',
                   'account_currency_code',
                   'external_account_id',
                   'carrier',

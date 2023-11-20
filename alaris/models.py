@@ -3,7 +3,7 @@ from django.db import models
 
 
 class ProductType(models.Model):
-    external_product_type_id = models.PositiveIntegerField(unique=True)
+    external_id = models.PositiveIntegerField(unique=True)
     name = models.CharField(max_length=120)
     insert_time = models.DateTimeField(auto_now_add=True)
     last_update_time = models.DateTimeField(auto_now=True)
@@ -13,7 +13,7 @@ class ProductType(models.Model):
 
 
 class Carrier(models.Model):
-    external_carrier_id = models.PositiveIntegerField(unique=True)
+    external_id = models.PositiveIntegerField(unique=True)
     name = models.CharField(max_length=120)
     is_active = models.BooleanField()
     insert_time = models.DateTimeField(auto_now_add=True)
@@ -24,12 +24,11 @@ class Carrier(models.Model):
 
 
 class Product(models.Model):
-    external_product_id = models.PositiveIntegerField(unique=True)
+    external_id = models.PositiveIntegerField(unique=True)
     account_currency_code = models.CharField(max_length=10)
     external_account_id = models.PositiveIntegerField()
     carrier = models.ForeignKey(
         Carrier,
-        to_field='external_carrier_id',
         on_delete=models.PROTECT,
         related_name='products',
     )
@@ -42,10 +41,9 @@ class Product(models.Model):
             MaxValueValidator(1),
         ],
     )
-    notes = models.CharField(max_length=120, blank=True)
+    notes = models.CharField(max_length=120, blank=True, null=True)
     type = models.ForeignKey(
         ProductType,
-        to_field='external_product_type_id',
         on_delete=models.PROTECT,
         related_name='products',
     )
@@ -53,4 +51,5 @@ class Product(models.Model):
     last_update_time = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.caption} <{self.type.name}>'
+        return self.caption
+        # return f'{self.caption} <{self.type.name}>'
