@@ -71,4 +71,3 @@ class Product(BaseModel):
     style: int
     systemid_list: str | None
     use_sender_mccmnc_rates: int
-

@@ -80,7 +80,7 @@ class ProductClient:
             method='get_product_list',
             params={
                 'type': product_type,
-                'direction': product_direction
-            }
+                'direction': product_direction,
+            },
         )
         return [Product(**product) for product in payload.result.data]

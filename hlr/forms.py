@@ -9,7 +9,9 @@ class TaskCreateForm(forms.ModelForm):
     file = forms.FileField(required=False)
     hlr = forms.ModelMultipleChoiceField(
         required=True,
-        widget=forms.CheckboxSelectMultiple(attrs={}),
+        widget=forms.CheckboxSelectMultiple(attrs={
+            'class': 'hlr-checkbox-select-multiply',
+        }),
         queryset=HlrProduct.objects,
 
     )
@@ -25,5 +27,5 @@ class TaskCreateForm(forms.ModelForm):
         fields = [
             'msisdn',
             'hlr',
-            'file'
+            'file',
         ]

@@ -3,15 +3,15 @@ import uuid
 from dataclasses import dataclass
 from itertools import product
 from typing import Generator
+import asyncio
 
 from django.conf import settings
 
 from celery import shared_task
-from django.db.models import QuerySet
 from pydantic import Field
 
 from alaris.models import Product
-from hlr.models import TaskDetail, Task as DbTask, HlrProduct as DbHlrProduct
+from hlr.models import TaskDetail, Task as DbTask
 from hlr.parser.context_log_parser import parse_context_log
 from hlr.parser.errors import ContextLogParserError
 from hlr.parser.hlr_parser import create_parser, HlrParserType, MsisdnInfo
@@ -78,29 +78,37 @@ def convert_from_hlr_failed_response(
     )
 
 
-def handle_task(
-        task: Task,
+async def handle_task(
+        tasks: list[Task],
         hlr_client: HlrClient,
-) -> tuple[MsisdnInfo | None, HlrFailedResponse | None]:
-    msisdn_info, hlr_error = None, None
-    try:
-        hlr_response = hlr_client.get_mccmnc_info(msisdn=task.msisdn, provider=task.provider_name)
-        parser = create_parser(HlrParserType[task.provider_type])
-        context_log = parse_context_log(hlr_response.context_log)
-        msisdn_info = parser.get_msisdn_info(context_log)
-        msisdn_info.request_id = hlr_response.message_id if (
-            hlr_response.message_id
-        ) else str(uuid.uuid4())
-    except HlrVendorNotFoundError as error:
-        hlr_error = convert_from_hlr_error(error, msisdn=task.msisdn, provider=task.provider_name)
-    except HlrProxyError as error:
-        hlr_error = convert_from_hlr_error(error, msisdn=task.msisdn, provider=task.provider_name)
-    except HlrClientHTTPError as error:
-        hlr_error = convert_from_hlr_http_error(error,
-                                                msisdn=task.msisdn,
-                                                provider=task.provider_name,
-                                                )
-    return msisdn_info, hlr_error
+) -> list[tuple[tuple[MsisdnInfo | None, HlrParserType], HlrFailedResponse | None]]:
+    response = []
+    results = await asyncio.gather(
+        *(hlr_client.get_mccmnc_info(msisdn=task.msisdn, provider=task.provider_name) for task in tasks),
+    )
+    for result in results:
+        msisdn_info, hlr_error = None, None
+        try:
+            parser = create_parser(HlrParserType[result.source_name.upper()])
+            context_log = parse_context_log(result.context_log)
+            msisdn_info = parser.get_msisdn_info(context_log)
+            msisdn_info.request_id = result.message_id if (
+                result.message_id
+            ) else str(uuid.uuid4())
+        except HlrVendorNotFoundError as error:
+            pass
+            hlr_error = convert_from_hlr_error(error, msisdn=result.msisdn, provider=result.provider_name)
+        except HlrProxyError as error:
+            hlr_error = convert_from_hlr_error(error, msisdn=result.msisdn, provider=result.provider_name)
+        except HlrClientHTTPError as error:
+            hlr_error = convert_from_hlr_http_error(error,
+                                                    msisdn=result.msisdn,
+                                                    provider=result.provider_name,
+                                                    )
+
+        response.append(((msisdn_info, HlrParserType[result.source_name.upper()]), hlr_error))
+
+    return response
 
 
 @shared_task()
@@ -112,50 +120,57 @@ def celery_task_handler(task_id: int,
                            password=settings.HLR_PASSWORD,
                            base_url=settings.HLR_BASE_URL,
                            )
-    task = DbTask.objects.get(pk=task_id)
-    task.in_progress()
-    task.save()
+    main_task = DbTask.objects.get(pk=task_id)
+    main_task.in_progress()
+    main_task.save()
 
-    hlr_products = Product.objects.filter(pk__in=hlr_products_external_id)
-    hlr_task_data = product(msisdns, hlr_products)
-
-    for msisdn, hlr_product in hlr_task_data:
-        task_detail = TaskDetail.objects.create(
-            task=task,
-            product=hlr_product,
+    hlr_sources = Product.objects.filter(pk__in=hlr_products_external_id)
+    task_details = product(msisdns, hlr_sources)
+    loop = asyncio.get_event_loop()
+    hlr_tasks = []
+    hlr_task_details = []
+    for msisdn, hlr_source in task_details:
+        task = TaskDetail.objects.create(
+            task=main_task,
+            product=hlr_source,
             msisdn=msisdn,
         )
         hlr_task = Task(msisdn=msisdn,
-                        provider_name=hlr_product.description,
-                        provider_type=hlr_product.hlr.type,
+                        provider_name=hlr_source.description,
+                        provider_type=hlr_source.hlr.type,
                         )
+        hlr_tasks.append(hlr_task)
 
+        task.in_progress()
+        task.save()
+        hlr_task_details.append(task)
 
-        task_detail.in_progress()
-        task_detail.save()
+    handled_tasks = loop.run_until_complete(handle_task(hlr_tasks, hlr_client))
+    for result in handled_tasks:
         try:
-            msisdn_info, error = handle_task(hlr_task, hlr_client)
-        except ContextLogParserError as error:
+            msisdn_info, error = result
+        except ContextLogParserError:
             # need to add logging
-            task_detail.failed()
-            task_detail.save()
-            task.ready()
-            task.save()
+            main_task.ready()
+            main_task.save()
             return
 
         if msisdn_info:
-            insert_successful_check(msisdn_info, task_detail)
-            task_detail.ready()
-            task_detail.save()
+            detail = [
+                task for task in hlr_task_details if
+                task.msisdn == msisdn_info[0].msisdn and task.product.description == msisdn_info[1].name.lower()
+            ][0]
+            insert_successful_check(msisdn_info[0], detail)
+            detail.ready()
+            detail.save()
 
         if error:
-            insert_failed_check(error, task_detail)
-            task_detail.failed()
-            task_detail.save()
+            insert_failed_check(error, detail)
+            detail.failed()
+            detail.save()
 
-    task.ready()
-    task.save()
-    return
+    main_task.ready()
+    main_task.save()
 
 
 def insert_failed_check(failed_response: HlrFailedResponse, task_detail: TaskDetail) -> None:

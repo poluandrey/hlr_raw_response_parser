@@ -33,24 +33,32 @@ def handle_hlr_response(hlr_response: dict[str, Any]) -> HlrResponse:
 class HlrClient:
 
     def __init__(self, login: str, password: str, base_url: str) -> None:
+        self.limits = httpx.Limits(max_connections=None, max_keepalive_connections=None)
         self.request_params: dict[str, str] = {
             'login': login,
             'password': password,
             'debug': '1',
         }
-        self.client = httpx.Client(
+        self.client = httpx.AsyncClient(
             base_url=base_url,
             params=self.request_params,
+
         )
 
-    def get_mccmnc_info(
+    async def send_mccmnc_request(self,
+                                  provider: str,
+                                  msisdn: str,
+                                  ):
+        params = {'dnis': msisdn, 'source_name': provider}
+        return await self.client.get('mccmnc_request', params=params)
+
+    async def get_mccmnc_info(
             self,
             provider: str,
             msisdn: str,
     ) -> HlrResponse:
-        params = {'dnis': msisdn, 'source_name': provider}
         try:
-            resp = self.client.get('mccmnc_request', params=params)
+            resp = await self.send_mccmnc_request(provider=provider, msisdn=msisdn)
             resp.raise_for_status()
             hlr_resp = resp.json()
             return handle_hlr_response(hlr_resp)

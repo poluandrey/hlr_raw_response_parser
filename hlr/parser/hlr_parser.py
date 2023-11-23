@@ -64,6 +64,7 @@ class TmtHlrHlrParser(HlrParser):
             case _:
                 return False
 
+
 class InfobipHlrHlrParser:
     """
     raw response example

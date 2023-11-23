@@ -42,6 +42,7 @@ class TaskAdmin(admin.ModelAdmin[Task]):
             for chunk in upload_file.chunks():
                 msisdn_from_file = chunk.decode('utf-8').replace('\n', '').strip().split('\r')
                 msisdns.extend(filter(lambda msisdn: True if msisdn else False, msisdn_from_file))
+
         if msisdn_field:
             msisdns.extend(msisdn_field.split(','))
 
@@ -55,7 +56,7 @@ class TaskAdmin(admin.ModelAdmin[Task]):
         url = reverse('admin:hlr_taskdetail_changelist') + f'?task={obj.id}'
         return format_html('<a href="{}">View TaskDetails</a>', url)
 
-    task_details_link.short_description = "Details"
+    task_details_link.short_description = 'Details'
 
 
 @admin.register(TaskDetail)
@@ -107,8 +108,8 @@ class TaskDetailAdmin(admin.ModelAdmin):
                              task_detail.mccmnc,
                              task_detail.ported,
                              task_detail.presents,
-                             task_detail.roaming
-                             ]
+                             task_detail.roaming,
+                             ],
                             )
 
         return response

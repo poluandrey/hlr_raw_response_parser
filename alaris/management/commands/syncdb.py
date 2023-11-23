@@ -14,10 +14,11 @@ def insert_carrier(batch_size, new_carrier):
         objects = [DBCarrier(
             external_id=carrier.car_id,
             name=carrier.car_name,
-            is_active=carrier.car_is_active
+            is_active=carrier.car_is_active,
         ) for carrier in batch]
         if not objects:
             break
+
         DBCarrier.objects.bulk_create(objects)
 
 
@@ -28,9 +29,11 @@ def update_carrie(carriers: DBCarrier, existing_carriers):
         if carrier.name != existing_carrier.car_name:
             carrier.name = existing_carrier.car_name
             changed = True
+
         if carrier.is_active != existing_carrier.car_is_active:
             carrier.is_active = existing_carrier.car_is_active
             changed = True
+
         if changed:
             carrier.save()
 
@@ -62,10 +65,12 @@ def insert_product(batch_size, new_products):
             direction=product.product_direction,
             notes=product.product_notes,
             carrier=DBCarrier.objects.get(external_id=product.car_id),
-            type=ProductType.objects.get(external_id=product.product_type)
+            type=ProductType.objects.get(external_id=product.product_type),
         ) for product in batch]
+
         if not objects:
             break
+
         DBProduct.objects.bulk_create(objects)
 
 
@@ -84,7 +89,7 @@ def handle_product_sync(batch_size, client):
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
-        parser.add_argument("--table-name", choices=['carrier', 'product'], required=True)
+        parser.add_argument('--table-name', choices=['carrier', 'product'], required=True)
         parser.add_argument('--batch-size', default=500, help='count of records to insert')
 
     def handle(self, *args, **options) -> None:
@@ -95,5 +100,3 @@ class Command(BaseCommand):
 
         if options['table_name'] == 'product':
             handle_product_sync(batch_size, client)
-
-
