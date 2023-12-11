@@ -36,3 +36,12 @@ class XconnectMnpResponse(BaseModel):
     mcc: str
     mnc: str
     ported: bool = Field(alias='npi')
+
+
+class MittoHlrResponse(BaseModel):
+    mcc: str
+    mnc: str
+    msisdn: str
+    present: bool = Field(alial='absent')
+    roaming: bool
+    ported: bool

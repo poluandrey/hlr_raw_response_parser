@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 from typing_extensions import NoReturn, assert_never
 
 from hlr.parser.hlr_responses import (InfobipHlrResponse, TmtHlrResponse,
-                                      XconnectHlrResponse, XconnectMnpResponse)
+                                      XconnectHlrResponse, XconnectMnpResponse, MittoHlrResponse)
 
 
 class MsisdnInfo(BaseModel):
@@ -66,39 +66,6 @@ class TmtHlrHlrParser(HlrParser):
 
 
 class InfobipHlrHlrParser:
-    """
-    raw response example
-    {"results": [
-     {
-       "to":"306980165782",
-       "mccMnc":"20201",
-       "imsi":"202010000000000",
-       "originalNetwork":{
-          "networkName":"Cosmote (Mobile Telecommunications S.A.)",
-          "networkPrefix":"6980165",
-          "countryName":"Greece",
-          "countryPrefix":"30",
-          "networkId":1560
-       },
-       "ported":false,
-       "roaming":false,
-       "status":{
-          "groupId":3,
-          "groupName":"DELIVERED",
-          "id":5,
-          "name":"DELIVERED_TO_HANDSET",
-          "description":"Message delivered to handset"
-       },
-       "failed_response":{
-          "groupId":0,
-          "groupName":"OK",
-          "id":0,
-          "name":"NO_ERROR",
-          "description":"No Error",
-          "permanent":false
-       }
-     }]}
-    """
 
     def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
         hlr_response = InfobipHlrResponse(**raw_response)
@@ -118,20 +85,6 @@ class InfobipHlrHlrParser:
 
 
 class XconnectHlrParser:
-    """
-    {
-    'tn': '306980165782',
-    'cc': 'GR',
-    'mcc': '202',
-    'mnc': '01',
-    'npdi': True,
-    'npi': False,
-    'nt': 'wireless',
-    'nv': '000',
-    'ns': '000',
-    'rc': '000'
-    }
-    """
 
     def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
         hlr_response = XconnectHlrResponse(**raw_response)
@@ -155,17 +108,6 @@ class XconnectHlrParser:
 
 
 class XconnectMnpParser:
-    """
-    {'tn': '306980165782',
-    'npdi': True,
-    'npi': False,
-    'mcc': '202',
-    'mnc': '01',
-    'cic': '83000009',
-    'cn': 'COSMOTE A.E.',
-    'cc': 'GR',
-    'nt': 'wireless'}
-    """
 
     def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
         xconnect_response = XconnectMnpResponse(**raw_response)
@@ -178,11 +120,24 @@ class XconnectMnpParser:
         )
 
 
+class MittoHlrParser:
+
+    def get_msisdn_info(self, raw_response: dict[str: Any]) -> MsisdnInfo:
+        hlr_response = MittoHlrResponse(**raw_response)
+        return MsisdnInfo(
+            msisdn=hlr_response.msisdn,
+            mccmnc=f'{hlr_response.mcc}0{hlr_response.mnc}',
+            ported=hlr_response.ported,
+            presents=hlr_response.present,
+            roaming=hlr_response.roaming,
+        )
+
 class HlrParserType(Enum):
     TMT_HLR = auto()
     INFOBIP_HLR = auto()
     XCONNECT_HLR = auto()
     XCONNECT_MNP = auto()
+    MITTO_HLR = auto()
 
 
 def create_parser(provider_type: HlrParserType) -> HlrParser:
@@ -195,5 +150,7 @@ def create_parser(provider_type: HlrParserType) -> HlrParser:
             return XconnectMnpParser()
         case provider_type.XCONNECT_HLR:
             return XconnectHlrParser()
+        case provider_type.MITTO_HLR:
+            return MittoHlrParser()
         case _:
             raise assert_never(NoReturn)
