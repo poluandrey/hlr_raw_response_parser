@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 from typing_extensions import NoReturn, assert_never
 
 from hlr.parser.hlr_responses import (InfobipHlrResponse, TmtHlrResponse,
-                                      XconnectHlrResponse, XconnectMnpResponse, MittoHlrResponse)
+                                      XconnectHlrResponse, XconnectMnpResponse, MittoHlrResponse, TyntecHlrResponse)
 
 
 class MsisdnInfo(BaseModel):
@@ -23,26 +23,6 @@ class HlrParser(Protocol):
 
 
 class TmtHlrHlrParser(HlrParser):
-    """
-    raw response example
-    {
-    "79216503431": {
-        "cic": "7629",
-        "failed_response": 191,
-        "imsi": "25001XXXXXXXXXX",
-        "mcc": "250",
-        "mnc": "01",
-        "network": "Mobilnyye TeleSistemy pjsc (MTS)",
-        "number": 79216503431,
-        "ported": true,
-        "presents": "na",
-        "status": 0,
-        "status_message": "Success",
-        "type": "mobile",
-        "trxid": "wRgugxm"
-    }
-    }
-    """
 
     def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
         msisdn = list(raw_response.keys())[0]
@@ -132,12 +112,26 @@ class MittoHlrParser:
             roaming=hlr_response.roaming,
         )
 
+
+class TyntecHlrParser:
+
+    def get_msisdn_info(self, raw_response: dict[str: Any]) -> MsisdnInfo:
+        hlr_response = TyntecHlrResponse(**raw_response)
+        return MsisdnInfo(
+            msisdn=hlr_response.msisdn,
+            mccmnc=f'{hlr_response.hlrMCC}0{hlr_response.hlrMNC}',
+            ported=hlr_response.ported,
+            presents=hlr_response.present,
+            roaming=hlr_response.roaming,
+        )
+
 class HlrParserType(Enum):
     TMT_HLR = auto()
     INFOBIP_HLR = auto()
     XCONNECT_HLR = auto()
     XCONNECT_MNP = auto()
     MITTO_HLR = auto()
+    TYNTEC_HLR = auto()
 
 
 def create_parser(provider_type: HlrParserType) -> HlrParser:
@@ -152,5 +146,7 @@ def create_parser(provider_type: HlrParserType) -> HlrParser:
             return XconnectHlrParser()
         case provider_type.MITTO_HLR:
             return MittoHlrParser()
+        case provider_type.TYNTEC_HLR:
+            return TyntecHlrParser()
         case _:
             raise assert_never(NoReturn)

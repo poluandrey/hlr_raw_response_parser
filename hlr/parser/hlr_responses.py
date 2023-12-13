@@ -45,3 +45,12 @@ class MittoHlrResponse(BaseModel):
     present: bool = Field(alial='absent')
     roaming: bool
     ported: bool
+
+
+class TyntecHlrResponse(BaseModel):
+    hlrMCC: str
+    hlrMNC: str
+    ported: bool
+    msisdn: str
+    present: str = Field(alias='presence')
+    roaming: str
