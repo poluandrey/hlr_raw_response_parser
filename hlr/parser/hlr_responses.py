@@ -54,3 +54,17 @@ class TyntecHlrResponse(BaseModel):
     msisdn: str
     present: str = Field(alias='presence')
     roaming: str
+
+
+class NetumberMnis(BaseModel):
+    mccmnc: str = Field(alias='hni')
+    name: str
+    msisdn: str = Field(alias='tel')
+    present: str = Field(alias='status')
+    cic: str
+
+
+class NetnumberHlrResponse(BaseModel):
+    response_code: int
+    message: str
+    mnis: NetumberMnis

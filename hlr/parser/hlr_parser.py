@@ -4,16 +4,16 @@ from typing import Any, Protocol
 from pydantic import BaseModel, Field
 from typing_extensions import NoReturn, assert_never
 
-from hlr.parser.hlr_responses import (InfobipHlrResponse, TmtHlrResponse,
+from hlr.parser.hlr_responses import (InfobipHlrResponse, TmtHlrResponse, NetnumberHlrResponse,
                                       XconnectHlrResponse, XconnectMnpResponse, MittoHlrResponse, TyntecHlrResponse)
 
 
 class MsisdnInfo(BaseModel):
     msisdn: str
     mccmnc: str
-    ported: bool | None
-    presents: bool | None
-    roaming: bool | None
+    ported: bool | None = Field(default=None)
+    presents: bool | None = Field(default=None)
+    roaming: bool | None = Field(default=None)
     request_id: str | None = Field(default=None)
 
 
@@ -125,6 +125,27 @@ class TyntecHlrParser:
             roaming=hlr_response.roaming,
         )
 
+
+class NetnumberHlrParser:
+
+    def get_msisdn_info(self, raw_response: dict[str: Any]) -> MsisdnInfo:
+        print(raw_response)
+        hlr_response = NetnumberHlrResponse(**raw_response)
+        match hlr_response.mnis.present:
+            case 'active':
+                presents = True
+            case 'not_active':
+                presents = False
+            case _:
+                presents = None
+
+        return MsisdnInfo(
+            msisdn=hlr_response.mnis.msisdn[1:],
+            mccmnc=f'{hlr_response.mnis.mccmnc[0:3]}0{hlr_response.mnis.mccmnc[3:]}',
+            presents=presents,
+        )
+
+
 class HlrParserType(Enum):
     TMT_HLR = auto()
     INFOBIP_HLR = auto()
@@ -132,6 +153,7 @@ class HlrParserType(Enum):
     XCONNECT_MNP = auto()
     MITTO_HLR = auto()
     TYNTEC_HLR = auto()
+    NETNUMBER_HLR = auto()
 
 
 def create_parser(provider_type: HlrParserType) -> HlrParser:
@@ -148,5 +170,7 @@ def create_parser(provider_type: HlrParserType) -> HlrParser:
             return MittoHlrParser()
         case provider_type.TYNTEC_HLR:
             return TyntecHlrParser()
+        case provider_type.NETNUMBER_HLR:
+            return NetnumberHlrParser()
         case _:
             raise assert_never(NoReturn)
