@@ -9,7 +9,9 @@ from hlr.parser.errors import (ContextLogNotFoundError, InvalidContextLogError,
 
 RAW_RESPONSE_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r'.*first raw response: (\{.*\})', re.S),
-    re.compile(r'.*cachedRawResponse: ((\[|\{).*(\}|\]))', re.S),
+    re.compile(r'.*cachedRawResponse: (\{.*\})', re.S),
+    re.compile(r'.*cachedRawResponse: (\[\{.*\}\])', re.S),
+    re.compile(r'.*cachedRawResponse: (\[\{.*\}\])', re.S),
 ]
 
 
