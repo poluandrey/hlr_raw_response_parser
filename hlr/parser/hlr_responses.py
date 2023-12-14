@@ -42,7 +42,7 @@ class MittoHlrResponse(BaseModel):
     mcc: str
     mnc: str
     msisdn: str
-    present: bool = Field(alial='absent')
+    present: bool = Field(alias='absent')
     roaming: bool
     ported: bool
 

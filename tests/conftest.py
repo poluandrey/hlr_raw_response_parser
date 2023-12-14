@@ -6,7 +6,7 @@ from unittest import mock
 from pytest import fixture
 
 from alaris.enterprise_api.client import EnterpriseClient
-from alaris.enterprise_api.schema import JsonRpcResponse, Carrier
+from alaris.enterprise_api.schema import JsonRpcResponse
 from alaris.models import ProductType, Product, Carrier as DBCarrier
 from hlr.client.client import HlrClient
 from hlr.client.schemas import HlrResponse

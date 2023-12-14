@@ -103,7 +103,7 @@ class XconnectMnpParser:
 class MittoHlrParser:
 
     def get_msisdn_info(self, raw_response: dict[str: Any]) -> MsisdnInfo:
-        hlr_response = MittoHlrResponse(**raw_response)
+        hlr_response = MittoHlrResponse(**raw_response[0])
         return MsisdnInfo(
             msisdn=hlr_response.msisdn,
             mccmnc=f'{hlr_response.mcc}0{hlr_response.mnc}',
@@ -129,7 +129,6 @@ class TyntecHlrParser:
 class NetnumberHlrParser:
 
     def get_msisdn_info(self, raw_response: dict[str: Any]) -> MsisdnInfo:
-        print(raw_response)
         hlr_response = NetnumberHlrResponse(**raw_response)
         match hlr_response.mnis.present:
             case 'active':
