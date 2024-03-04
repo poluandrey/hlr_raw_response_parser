@@ -39,14 +39,14 @@ class TaskAdmin(admin.ModelAdmin[Task]):
         hlrs_external_id = list(form.cleaned_data['hlr'].values_list('product_id', flat=True))
 
         if upload_file:
-            # for chunk in upload_file.chunks():
-            #     msisdn_from_file = chunk.decode('utf-8-sig').replace('\n', '').strip().split('\r')
-            #     msisdn_from_file = [msisdn.lstrip('\ufeff') for msisdn in msisdn_from_file]
-            #     msisdns.extend(filter(lambda msisdn: True if msisdn else False, msisdn_from_file))
-            with open(upload_file, 'rb', encoding='utf-8-sig') as file:
-                reader = csv.reader(file)
-                msisdn_from_file = [row for row in reader]
+            for chunk in upload_file.chunks():
+                msisdn_from_file = chunk.decode('utf-8-sig').replace('\n', '').strip().split('\r')
+                msisdn_from_file = [msisdn.lstrip('\ufeff') for msisdn in msisdn_from_file]
                 msisdns.extend(filter(lambda msisdn: True if msisdn else False, msisdn_from_file))
+            # with open(upload_file, 'rb', encoding='utf-8-sig') as file:
+            #     reader = csv.reader(file)
+            #     msisdn_from_file = [row for row in reader]
+            #     msisdns.extend(filter(lambda msisdn: True if msisdn else False, msisdn_from_file))
 
         if msisdn_field:
             msisdns.extend(msisdn_field.split(','))
