@@ -115,10 +115,10 @@ async def handle_task(
             response.append(((msisdn_info, HlrParserType[result.source_name.upper()]), hlr_error))
         elif isinstance(result, HlrProxyInternalError):
             hlr_error = HlrFailedResponse(
-                msisdn=hlr_error.msisdn,
-                result=hlr_error.result,
-                message_id=hlr_error.message_id,
-                http_error=hlr_error.result
+                msisdn=result.msisdn,
+                result=result.result,
+                message_id=result.message_id,
+                http_error=result.result
             )
             response.append(((msisdn_info, None), hlr_error))
 
