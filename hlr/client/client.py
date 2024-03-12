@@ -28,6 +28,7 @@ def handle_hlr_response(hlr_response: dict[str, Any]) -> HlrResponse:
         message=message,
         result=hlr_resp_result,
         message_id=hlr_response['message_id'],
+        provider=hlr_response['source_name']
     )
 
 

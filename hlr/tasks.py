@@ -118,7 +118,9 @@ async def handle_task(
                 msisdn=result.msisdn,
                 result=result.result,
                 message_id=result.message_id,
-                http_error=result.result
+                http_error=result.result,
+                message=result.message,
+                provider=result.provider,
             )
             response.append(((msisdn_info, None), hlr_error))
 

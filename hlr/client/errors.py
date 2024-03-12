@@ -29,9 +29,12 @@ class HlrProxyInternalError(HlrProxyError):
     def __init__(self, result: int,
                  message_id: str,
                  message: str | None,
-                 msisdn: str):
+                 msisdn: str,
+                 provider,
+                 ):
         super().__init__(result,
                          message_id,
                          message)
         self.msisdn = msisdn
+        self.provider = provider
 
