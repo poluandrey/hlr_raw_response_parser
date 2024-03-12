@@ -161,6 +161,7 @@ def celery_task_handler(task_id: int,
 
     handled_tasks = loop.run_until_complete(handle_task(hlr_tasks, hlr_client))
     for result in handled_tasks:
+        print(result)
         try:
             msisdn_info, error = result
         except ContextLogParserError:
