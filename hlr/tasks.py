@@ -85,7 +85,9 @@ async def handle_task(
     response = []
     results = await asyncio.gather(
         *(hlr_client.get_mccmnc_info(msisdn=task.msisdn, provider=task.provider_name) for task in tasks),
+        return_exceptions=True,
     )
+    print(results)
     for result in results:
         msisdn_info, hlr_error = None, None
         try:
