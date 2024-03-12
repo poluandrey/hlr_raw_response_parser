@@ -172,22 +172,21 @@ def celery_task_handler(task_id: int,
             main_task.ready()
             main_task.save()
             return
-
-        if msisdn_info:
-            # find detail by msisdn and hlr product
-            detail = [
-                task for task in hlr_task_details if
-                task.msisdn == msisdn_info[0].msisdn and task.product.description == msisdn_info[1].name.lower()
-            ][0]
-            insert_successful_check(msisdn_info[0], detail)
-            detail.ready()
-            detail.save()
-
         if error:
             print(error)
             insert_failed_check(error, detail)
             detail.failed()
             detail.save()
+            continue
+
+
+        detail = [
+            task for task in hlr_task_details if
+            task.msisdn == msisdn_info[0].msisdn and task.product.description == msisdn_info[1].name.lower()
+        ][0]
+        insert_successful_check(msisdn_info[0], detail)
+        detail.ready()
+        detail.save()
 
     main_task.ready()
     main_task.save()
