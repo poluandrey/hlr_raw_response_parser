@@ -11,12 +11,13 @@ from celery import shared_task
 from pydantic import Field
 
 from alaris.models import Product
+from hlr.client.schemas import HlrResponse
 from hlr.models import TaskDetail, Task as DbTask
 from hlr.parser.context_log_parser import parse_context_log
 from hlr.parser.errors import ContextLogParserError
 from hlr.parser.hlr_parser import create_parser, HlrParserType, MsisdnInfo
 from hlr.client.errors import (HlrClientError, HlrClientHTTPError,
-                               HlrProxyError, HlrVendorNotFoundError)
+                               HlrProxyError, HlrVendorNotFoundError, HlrProxyInternalError)
 from hlr.client.client import HlrClient
 
 
@@ -49,6 +50,8 @@ def convert_from_hlr_error(
         result=error.result,
         message=error.message,
     )
+
+
 
 
 def convert_from_hlr_http_error(
@@ -90,24 +93,31 @@ async def handle_task(
     print(results)
     for result in results:
         msisdn_info, hlr_error = None, None
-        try:
-            parser = create_parser(HlrParserType[result.source_name.upper()])
-            context_log = parse_context_log(result.context_log)
-            msisdn_info = parser.get_msisdn_info(context_log)
-            msisdn_info.request_id = result.message_id if (
-                result.message_id
-            ) else str(uuid.uuid4())
-        except HlrVendorNotFoundError as error:
-            pass
-            hlr_error = convert_from_hlr_error(error, msisdn=result.msisdn, provider=result.provider_name)
-        except HlrProxyError as error:
-            hlr_error = convert_from_hlr_error(error, msisdn=result.msisdn, provider=result.provider_name)
-        except HlrClientHTTPError as error:
-            hlr_error = convert_from_hlr_http_error(error,
-                                                    msisdn=result.msisdn,
-                                                    provider=result.provider_name,
-                                                    )
-
+        if isinstance(result, HlrResponse):
+            try:
+                parser = create_parser(HlrParserType[result.source_name.upper()])
+                context_log = parse_context_log(result.context_log)
+                msisdn_info = parser.get_msisdn_info(context_log)
+                msisdn_info.request_id = result.message_id if (
+                    result.message_id
+                ) else str(uuid.uuid4())
+            except HlrVendorNotFoundError as error:
+                pass
+                hlr_error = convert_from_hlr_error(error, msisdn=result.msisdn, provider=result.provider_name)
+            except HlrProxyError as error:
+                hlr_error = convert_from_hlr_error(error, msisdn=result.msisdn, provider=result.provider_name)
+            except HlrClientHTTPError as error:
+                hlr_error = convert_from_hlr_http_error(error,
+                                                        msisdn=result.msisdn,
+                                                        provider=result.provider_name,
+                                                        )
+        elif isinstance(hlr_error, HlrProxyInternalError):
+            hlr_error = HlrFailedResponse(
+                msisdn=hlr_error.msisdn,
+                result=hlr_error.result,
+                message_id=hlr_error.message_id,
+                http_error=hlr_error.result
+            )
         response.append(((msisdn_info, HlrParserType[result.source_name.upper()]), hlr_error))
 
     return response

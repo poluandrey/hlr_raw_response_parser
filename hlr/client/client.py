@@ -24,6 +24,7 @@ def handle_hlr_response(hlr_response: dict[str, Any]) -> HlrResponse:
         message = hlr_response.get('failed_response')
 
     raise HlrProxyInternalError(
+        msisdn=hlr_response.get('dnis'),
         message=message,
         result=hlr_resp_result,
         message_id=hlr_response['message_id'],

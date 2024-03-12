@@ -26,4 +26,12 @@ class HlrVendorNotFoundError(HlrProxyError):
 
 
 class HlrProxyInternalError(HlrProxyError):
-    pass
+    def __init__(self, result: int,
+                 message_id: str,
+                 message: str | None,
+                 msisdn: str):
+        super().__init__(result,
+                         message_id,
+                         message)
+        self.msisdn = msisdn
+
