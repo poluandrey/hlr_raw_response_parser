@@ -120,7 +120,7 @@ async def handle_task(
                 message_id=hlr_error.message_id,
                 http_error=hlr_error.result
             )
-        response.append(((msisdn_info, None), hlr_error))
+            response.append(((msisdn_info, None), hlr_error))
 
     return response
 
