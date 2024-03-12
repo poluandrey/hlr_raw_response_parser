@@ -92,6 +92,7 @@ async def handle_task(
     )
     print(results)
     for result in results:
+        print(result)
         msisdn_info, hlr_error = None, None
         if isinstance(result, HlrResponse):
             try:
