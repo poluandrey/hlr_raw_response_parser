@@ -174,6 +174,10 @@ def celery_task_handler(task_id: int,
             return
         if error:
             print(error)
+            detail = [
+                task for task in hlr_task_details if
+                task.msisdn == error.msisdn and task.product.description == error.provider
+            ][0]
             insert_failed_check(error, detail)
             detail.failed()
             detail.save()
