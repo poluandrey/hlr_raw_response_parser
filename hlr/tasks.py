@@ -84,7 +84,7 @@ def convert_from_hlr_failed_response(
 async def handle_task(
         tasks: list[Task],
         hlr_client: HlrClient,
-) -> list[tuple[tuple[MsisdnInfo | None, HlrParserType], HlrFailedResponse | None]]:
+) -> list[tuple[tuple[MsisdnInfo | None, HlrParserType | None], HlrFailedResponse | None]]:
     response = []
     results = await asyncio.gather(
         *(hlr_client.get_mccmnc_info(msisdn=task.msisdn, provider=task.provider_name) for task in tasks),
@@ -111,14 +111,15 @@ async def handle_task(
                                                         msisdn=result.msisdn,
                                                         provider=result.provider_name,
                                                         )
-        elif isinstance(hlr_error, HlrProxyInternalError):
+            response.append(((msisdn_info, HlrParserType[result.source_name.upper()]), hlr_error))
+        elif isinstance(result, HlrProxyInternalError):
             hlr_error = HlrFailedResponse(
                 msisdn=hlr_error.msisdn,
                 result=hlr_error.result,
                 message_id=hlr_error.message_id,
                 http_error=hlr_error.result
             )
-        response.append(((msisdn_info, HlrParserType[result.source_name.upper()]), hlr_error))
+        response.append(((msisdn_info, None), hlr_error))
 
     return response
 
@@ -178,6 +179,7 @@ def celery_task_handler(task_id: int,
             detail.save()
 
         if error:
+            print(error)
             insert_failed_check(error, detail)
             detail.failed()
             detail.save()
