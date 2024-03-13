@@ -74,6 +74,7 @@ class TaskDetailAdmin(admin.ModelAdmin):
         'ported',
         'presents',
         'roaming',
+        'message',
     ]
 
     readonly_fields = ['author']
