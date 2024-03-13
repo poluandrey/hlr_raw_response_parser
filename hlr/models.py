@@ -52,7 +52,7 @@ class TaskDetail(models.Model):
     ported = models.BooleanField(null=True)
     roaming = models.BooleanField(null=True)
     presents = models.BooleanField(null=True)
-    message = models.CharField(max_length=200, null=True, blank=True)
+    message = models.CharField(max_length=360, null=True, blank=True)
     http_error_code = models.IntegerField(null=True)
     insert_time = models.DateTimeField(auto_now_add=True)
     last_update_time = models.DateTimeField(auto_now=True)
