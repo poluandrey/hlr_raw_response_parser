@@ -103,6 +103,7 @@ class XconnectMnpParser:
 class MittoHlrParser:
 
     def get_msisdn_info(self, raw_response: dict[str: Any]) -> MsisdnInfo:
+        print(raw_response)
         hlr_response = MittoHlrResponse(**raw_response[0])
         return MsisdnInfo(
             msisdn=hlr_response.msisdn,

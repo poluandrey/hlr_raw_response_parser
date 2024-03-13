@@ -103,7 +103,6 @@ async def handle_task(
                     result.message_id
                 ) else str(uuid.uuid4())
             except HlrVendorNotFoundError as error:
-                pass
                 hlr_error = convert_from_hlr_error(error, msisdn=result.msisdn, provider=result.provider_name)
             except HlrProxyError as error:
                 hlr_error = convert_from_hlr_error(error, msisdn=result.msisdn, provider=result.provider_name)
