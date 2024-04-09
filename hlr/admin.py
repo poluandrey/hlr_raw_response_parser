@@ -41,7 +41,7 @@ class TaskAdmin(admin.ModelAdmin[Task]):
         if upload_file:
             for chunk in upload_file.chunks():
                 msisdn_from_file = chunk.decode('utf-8-sig').replace('\n', '').strip().split('\r')
-                msisdn_from_file = [msisdn.lstrip('\ufeff') for msisdn in msisdn_from_file]
+                msisdn_from_file = list(set(msisdn.lstrip('\ufeff') for msisdn in msisdn_from_file))
                 msisdns.extend(filter(lambda msisdn: True if msisdn else False, msisdn_from_file))
 
         if msisdn_field:
