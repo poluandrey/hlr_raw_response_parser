@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 from typing_extensions import NoReturn, assert_never
 
 from hlr.parser.hlr_responses import (InfobipHlrResponse, TmtHlrResponse, NetnumberHlrResponse,
-                                      XconnectHlrResponse, XconnectMnpResponse, MittoHlrResponse, TyntecHlrResponse)
+                                      XconnectHlrResponse, XconnectMnpResponse, MittoHlrResponse, TyntecHlrResponse, TyntecMnpResponse)
 
 
 class MsisdnInfo(BaseModel):
@@ -103,7 +103,7 @@ class XconnectMnpParser:
 class MittoHlrParser:
 
     def get_msisdn_info(self, raw_response: dict[str: Any]) -> MsisdnInfo:
-        print(raw_response)
+        # print(raw_response)
         hlr_response = MittoHlrResponse(**raw_response[0])
         return MsisdnInfo(
             msisdn=hlr_response.msisdn,
@@ -124,6 +124,19 @@ class TyntecHlrParser:
             ported=hlr_response.ported,
             presents=hlr_response.present,
             roaming=hlr_response.roaming,
+        )
+
+
+class TyntecMnpParser:
+
+    def get_msisdn_info(self, raw_response: dict[str: Any]) -> MsisdnInfo:
+        hlr_response = TyntecMnpResponse(**raw_response)
+        return MsisdnInfo(
+            msisdn=hlr_response.msisdn,
+            mccmnc=f'{hlr_response.mcc}0{hlr_response.mnc}',
+            ported=hlr_response.ported,
+            presents=None,
+            roaming=None,
         )
 
 
@@ -153,6 +166,7 @@ class HlrParserType(Enum):
     XCONNECT_MNP = auto()
     MITTO_HLR = auto()
     TYNTEC_HLR = auto()
+    TYNTEC_MNP = auto()
     NETNUMBER_HLR = auto()
 
 
@@ -160,6 +174,8 @@ def create_parser(provider_type: HlrParserType) -> HlrParser:
     match provider_type:
         case provider_type.TMT_HLR:
             return TmtHlrHlrParser()
+        case provider_type.TYNTEC_MNP:
+            return TyntecMnpParser()
         case provider_type.INFOBIP_HLR:
             return InfobipHlrHlrParser()
         case provider_type.XCONNECT_MNP:

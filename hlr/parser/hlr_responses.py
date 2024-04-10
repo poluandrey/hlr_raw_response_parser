@@ -56,6 +56,13 @@ class TyntecHlrResponse(BaseModel):
     roaming: str
 
 
+class TyntecMnpResponse(BaseModel):
+    mcc: str
+    mnc: str
+    ported: bool
+    msisdn: str
+
+
 class NetumberMnis(BaseModel):
     mccmnc: str = Field(alias='hni')
     name: str
