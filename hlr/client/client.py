@@ -9,6 +9,7 @@ from hlr.client.schemas import HlrResponse
 
 def handle_hlr_response(hlr_response: dict[str, Any]) -> HlrResponse:
     hlr_resp_result = hlr_response['result']
+
     if hlr_resp_result == 0:
         return HlrResponse(**hlr_response)
 
@@ -62,8 +63,10 @@ class HlrClient:
         try:
             resp = await self.send_mccmnc_request(provider=provider, msisdn=msisdn)
             resp.raise_for_status()
-            hlr_resp = resp.json()
-            return handle_hlr_response(hlr_resp)
+            resp_content = resp.json()
+            hlr_resp = handle_hlr_response(resp_content)
+            return hlr_resp
+
         except httpx.HTTPStatusError as error:
             raise HlrClientHTTPError(
                 error_code=error.response.status_code,

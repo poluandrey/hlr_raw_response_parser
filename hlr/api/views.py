@@ -9,7 +9,7 @@ from hlr.api.sieializers import (TaskCreateSerializer, TaskDetailSerializer,
                                  TaskRetrieveSerializer)
 from hlr.models import Task as HlrTask, TaskDetail
 
-from hlr.tasks import celery_task_handler
+from hlr.tasks import hlr_task
 
 
 class TaskView(GenericViewSet, CreateModelMixin, ListModelMixin, RetrieveModelMixin):
@@ -26,7 +26,7 @@ class TaskView(GenericViewSet, CreateModelMixin, ListModelMixin, RetrieveModelMi
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         task = HlrTask.objects.create(author=serializer.validated_data['author'])
-        celery_task_handler(
+        hlr_task(
             task=task,
             msisdns=serializer.validated_data['msisdn'],
             hlr_products_external_id=serializer.validated_data['external_product_id'],

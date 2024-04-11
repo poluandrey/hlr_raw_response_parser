@@ -7,7 +7,7 @@ from django.http.response import HttpResponse
 
 from hlr.models import Task, TaskDetail, HlrProduct
 from hlr.forms import TaskCreateForm
-from hlr.tasks import celery_task_handler
+from hlr.tasks import hlr_task
 
 
 @admin.register(Task)
@@ -33,7 +33,7 @@ class TaskAdmin(admin.ModelAdmin[Task]):
         return super().get_form(request, obj, **defaults)
 
     def save_model(self, request, obj: Task, form, change):
-        msisdns = []
+        msisdns = set()
         msisdn_field = form.cleaned_data['msisdn']
         upload_file = form.cleaned_data['file']
         hlrs_external_id = list(form.cleaned_data['hlr'].values_list('product_id', flat=True))
@@ -41,17 +41,18 @@ class TaskAdmin(admin.ModelAdmin[Task]):
         if upload_file:
             for chunk in upload_file.chunks():
                 msisdn_from_file = chunk.decode('utf-8-sig').replace('\n', '').strip().split('\r')
-                msisdn_from_file = list(set(msisdn.lstrip('\ufeff') for msisdn in msisdn_from_file))
-                msisdns.extend(filter(lambda msisdn: True if msisdn else False, msisdn_from_file))
+                msisdn_from_file = set(msisdn.lstrip('\ufeff') for msisdn in msisdn_from_file)
+                msisdns.update(list(filter(lambda msisdn: True if msisdn else False, msisdn_from_file)))
 
-        if msisdn_field:
-            msisdns.extend(msisdn_field.split(','))
-
+        else:
+            for msisdn in msisdn_field.split(','):
+                msisdns.add(msisdn.strip())
+        msisdns = list(msisdns)
         form.instance.author = request.user
         super().save_model(request, obj, form, change)
-        celery_task_handler.delay(task_id=obj.pk,
-                                  msisdns=msisdns,
-                                  hlr_products_external_id=hlrs_external_id)
+        hlr_task.delay(task_id=obj.pk,
+                       msisdns=msisdns,
+                       hlr_products_external_id=hlrs_external_id)
 
     def task_details_link(self, obj):
         url = reverse('admin:hlr_taskdetail_changelist') + f'?task={obj.id}'
