@@ -79,7 +79,7 @@ def handle_product_sync(batch_size, client):
     external_products_id = {product.product_id for product in external_products}
 
     products = DBProduct.objects.all()
-    products_id = {product.product_id for product in products}
+    products_id = {product.external_id for product in products}
 
     new_product_id = external_products_id.difference(products_id)
     new_products = filter(lambda product: product.product_id in new_product_id, external_products)
