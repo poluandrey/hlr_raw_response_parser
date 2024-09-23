@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 from typing_extensions import NoReturn, assert_never
 
 from hlr.parser.hlr_responses import (InfobipHlrResponse, TmtHlrResponse, NetnumberHlrResponse,
-                                      XconnectHlrResponse, XconnectMnpResponse, MittoHlrResponse, TyntecHlrResponse, TyntecMnpResponse)
+                                      XconnectHlrResponse, XconnectMnpResponse, MittoHlrResponse, TyntecHlrResponse, TyntecMnpResponse, DatafoneMnpResponse)
 
 
 class MsisdnInfo(BaseModel):
@@ -22,7 +22,20 @@ class HlrParser(Protocol):
         pass
 
 
-class TmtHlrHlrParser(HlrParser):
+class DatafoneMnpParser:
+
+    def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
+        hlr_response = DatafoneMnpResponse(**raw_response)
+        return MsisdnInfo(
+            msisdn=hlr_response.msisdn,
+            mccmnc=hlr_response.mccmnc,
+            ported=hlr_response.ported,
+            presents=None,
+            roaming=None,
+        )
+
+
+class TmtHlrHlrParser:
 
     def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
         msisdn = list(raw_response.keys())[0]
@@ -168,6 +181,7 @@ class HlrParserType(Enum):
     TYNTEC_HLR = auto()
     TYNTEC_MNP = auto()
     NETNUMBER_HLR = auto()
+    DATAFON_MNP = auto()
 
 
 def create_parser(provider_type: HlrParserType) -> HlrParser:
@@ -188,5 +202,7 @@ def create_parser(provider_type: HlrParserType) -> HlrParser:
             return TyntecHlrParser()
         case provider_type.NETNUMBER_HLR:
             return NetnumberHlrParser()
+        case provider_type.DATAFON_MNP:
+            return DatafoneMnpParser()
         case _:
             raise assert_never(NoReturn)
