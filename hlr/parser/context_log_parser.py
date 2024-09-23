@@ -48,6 +48,7 @@ def parse_context_log(context_log: str) -> dict[str, Any]:
     nested_context_log = get_nested_context_log(serialized_context_log)
     print(f'nested context log: {nested_context_log}')
     raw_response = extruct_raw_response(nested_context_log)
+    print(raw_response)
     try:
         return json.loads(raw_response)
     except json.JSONDecodeError as error:
