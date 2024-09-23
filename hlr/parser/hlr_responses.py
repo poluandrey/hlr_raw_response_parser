@@ -23,6 +23,13 @@ class TmtHlrResponse(BaseModel):
     type: str
 
 
+class DatafoneMnpResponse(BaseModel):
+    msisdn: str = Field(alias='dnis')
+    mccmnc: str
+    ported:  int
+    result: int
+
+
 class XconnectHlrResponse(BaseModel):
     msisdn: str = Field(alias='tn')
     mcc: str
