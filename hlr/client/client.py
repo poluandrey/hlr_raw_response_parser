@@ -36,7 +36,7 @@ def handle_hlr_response(hlr_response: dict[str, Any]) -> HlrResponse:
 class HlrClient:
 
     def __init__(self, login: str, password: str, base_url: str) -> None:
-        self.limits = httpx.Limits(max_connections=None, max_keepalive_connections=None)
+        self.limits = httpx.Limits(max_connections=None, max_keepalive_connections=None, keepalive_expiry=None)
         self.request_params: dict[str, str] = {
             'login': login,
             'password': password,
@@ -45,7 +45,7 @@ class HlrClient:
         self.client = httpx.AsyncClient(
             base_url=base_url,
             params=self.request_params,
-
+            limits=self.limits
         )
 
     async def send_mccmnc_request(self,
