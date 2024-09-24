@@ -1,10 +1,13 @@
 from typing import Any
+from asyncio import Semaphore
 
 import httpx
 
 from hlr.client.errors import (HlrClientError, HlrClientHTTPError,
                                HlrProxyInternalError, HlrVendorNotFoundError)
 from hlr.client.schemas import HlrResponse
+
+sem = Semaphore(10)
 
 
 def handle_hlr_response(hlr_response: dict[str, Any]) -> HlrResponse:
@@ -52,11 +55,12 @@ class HlrClient:
                                   provider: str,
                                   msisdn: str,
                                   ):
-        print(f'msisdn: {msisdn}')
-        params = {'dnis': msisdn, 'source_name': provider}
-        resp = await self.client.get('mccmnc_request', params=params)
-        print(resp)
-        return resp
+        async with sem:
+            print(f'msisdn: {msisdn}')
+            params = {'dnis': msisdn, 'source_name': provider}
+            resp = await self.client.get('mccmnc_request', params=params)
+            print(resp)
+            return resp
 
     async def get_mccmnc_info(
             self,
