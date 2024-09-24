@@ -71,3 +71,5 @@ class HlrClient:
         except httpx.HTTPError as error:
             print(error)
             raise HlrClientError from error
+        except HlrProxyInternalError as error:
+            print(error)
