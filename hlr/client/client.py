@@ -69,4 +69,5 @@ class HlrClient:
                 error_code=error.response.status_code,
             ) from error
         except httpx.HTTPError as error:
+            print(error)
             raise HlrClientError from error
