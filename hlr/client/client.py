@@ -55,6 +55,7 @@ class HlrClient:
         print(f'msisdn: {msisdn}')
         params = {'dnis': msisdn, 'source_name': provider}
         resp = await self.client.get('mccmnc_request', params=params)
+        print(resp)
         return resp
 
     async def get_mccmnc_info(
