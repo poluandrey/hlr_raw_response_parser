@@ -52,6 +52,7 @@ class HlrClient:
                                   provider: str,
                                   msisdn: str,
                                   ):
+        print(f'msisdn: {msisdn}')
         params = {'dnis': msisdn, 'source_name': provider}
         return await self.client.get('mccmnc_request', params=params)
 
@@ -62,6 +63,7 @@ class HlrClient:
     ) -> HlrResponse:
         try:
             resp = await self.send_mccmnc_request(provider=provider, msisdn=msisdn)
+            print(f'msisdn: {msisdn}, resp: {resp}')
             resp.raise_for_status()
             hlr_resp = resp.json()
             return handle_hlr_response(hlr_resp)
