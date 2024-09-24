@@ -65,6 +65,7 @@ class HlrClient:
             hlr_resp = resp.json()
             return handle_hlr_response(hlr_resp)
         except httpx.HTTPStatusError as error:
+            print(error)
             raise HlrClientHTTPError(
                 error_code=error.response.status_code,
             ) from error
