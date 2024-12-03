@@ -7,16 +7,20 @@ from hlr.parser.errors import (ContextLogNotFoundError, InvalidContextLogError,
                                InvalidRawResponseError,
                                RawResponseNotFoundError)
 
+
+# сначала надо указывать шаблоны для raw_response а потом для cached_raw_response
 RAW_RESPONSE_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r'.*first raw response: (\{.*\})', re.S),
+    re.compile(r'.*raw response:\s*(result=[^;]+;imsi=\d+)', re.S),
+    re.compile(r'.*raw response: ([^;]+;[^;]+);', re.S),
+    re.compile(r'.*first raw response:: ([^;]+;[^;]+);', re.S),
+
     re.compile(r'.*cachedRawResponse: (\{.*\})', re.S),
     re.compile(r'.*cachedRawResponse: (\[\{.*\}\])', re.S),
     re.compile(r'.*cachedRawResponse: (\[\{.*\}\])', re.S),
     re.compile(r'.*cachedRawResponse: (\[\{.*\}\])', re.S),
-    re.compile(r'.*raw response: ([^;]+;[^;]+);', re.S),
     re.compile(r'.*cachedRawResponse: ([^;]+;[^;]+);', re.S),
     re.compile(r'cachedRawResponse: ([^;]+;[^;]+)', re.S),
-    re.compile(r'.*first raw response:: ([^;]+;[^;]+);', re.S),
     re.compile(r'.*cachedRawResponse:\s*([^;]+;[^;]+)', re.S),
 
 ]
