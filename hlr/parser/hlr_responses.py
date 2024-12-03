@@ -34,6 +34,13 @@ class SinchMnpResponse(BaseModel):
     imsi: str
 
 
+class AlarisResponse(BaseModel):
+    msisdn: str
+    mccmnc: str
+    ported: int
+    result: int
+
+
 class XconnectHlrResponse(BaseModel):
     msisdn: str = Field(alias='tn')
     mcc: str
@@ -59,9 +66,9 @@ class MittoHlrResponse(BaseModel):
 
 
 class TyntecHlrResponse(BaseModel):
-    hlrMCC: str
-    hlrMNC: str
-    ported: bool
+    nrhMCC: str
+    nrhMNC: str
+    ported: str
     msisdn: str
     present: str = Field(alias='presence')
     roaming: str
