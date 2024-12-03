@@ -14,6 +14,8 @@ RAW_RESPONSE_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r'.*cachedRawResponse: (\[\{.*\}\])', re.S),
     re.compile(r'.*cachedRawResponse: (\[\{.*\}\])', re.S),
     re.compile(r'.*raw response: ([^;]+;[^;]+);', re.S),
+    re.compile(r'.*cachedRawResponse: ([^;]+;[^;]+);', re.S),
+    re.compile(r'.*first raw response:: ([^;]+;[^;]+);', re.S),
 ]
 
 
