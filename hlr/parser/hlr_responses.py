@@ -30,6 +30,10 @@ class DatafoneMnpResponse(BaseModel):
     result: int
 
 
+class SinchMnpResponse(BaseModel):
+    imsi: str
+
+
 class XconnectHlrResponse(BaseModel):
     msisdn: str = Field(alias='tn')
     mcc: str
