@@ -59,4 +59,6 @@ def parse_context_log(context_log: str) -> dict[str, Any]:
     try:
         return json.loads(raw_response)
     except json.JSONDecodeError as error:
+        return serialized_context_log
         raise InvalidRawResponseError from error
+

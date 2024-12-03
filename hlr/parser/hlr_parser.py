@@ -6,7 +6,7 @@ from typing_extensions import NoReturn, assert_never
 
 from hlr.parser.hlr_responses import (InfobipHlrResponse, TmtHlrResponse, NetnumberHlrResponse,
                                       XconnectHlrResponse, XconnectMnpResponse, MittoHlrResponse, TyntecHlrResponse,
-                                      TyntecMnpResponse, DatafoneMnpResponse, SinchMnpResponse)
+                                      TyntecMnpResponse, DatafoneMnpResponse, SinchMnpResponse, AlarisResponse)
 
 
 class MsisdnInfo(BaseModel):
@@ -38,7 +38,7 @@ class DatafoneMnpParser:
 class SinchMnpParser:
 
     def get_msisdn_info(self, raw_response:dict[str, Any]) -> MsisdnInfo:
-        hlr_response = SinchMnpResponse(**raw_response)
+        hlr_response = AlarisResponse(**raw_response)
         return MsisdnInfo(
             msisdn=hlr_response.msisdn,
             mccmnc=hlr_response.mccmnc,
