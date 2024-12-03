@@ -50,7 +50,7 @@ def extruct_raw_response(nested_context_log: list[str]) -> str:
     raise RawResponseNotFoundError
 
 
-def parse_context_log(context_log: str) -> dict[str, Any]:
+def parse_context_log(context_log: str, result) -> dict[str, Any]:
     serialized_context_log = serialize_context_log(context_log)
     nested_context_log = get_nested_context_log(serialized_context_log)
     print(f'nested context log: {nested_context_log}')
@@ -59,6 +59,7 @@ def parse_context_log(context_log: str) -> dict[str, Any]:
     try:
         return json.loads(raw_response)
     except json.JSONDecodeError as error:
-        return serialized_context_log
-        raise InvalidRawResponseError from error
+        # если ошибка возвращаем ответ алариса что бы достать из него данные
+        return result
+        # raise InvalidRawResponseError from error
 
