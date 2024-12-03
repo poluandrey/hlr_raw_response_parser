@@ -38,6 +38,8 @@ class DatafoneMnpParser:
 class SinchMnpParser:
 
     def get_msisdn_info(self, raw_response:dict[str, Any]) -> MsisdnInfo:
+        print(raw_response)
+        print(type(raw_response))
         hlr_response = AlarisResponse(**raw_response)
         return MsisdnInfo(
             msisdn=hlr_response.msisdn,
@@ -146,7 +148,7 @@ class TyntecHlrParser:
         hlr_response = TyntecHlrResponse(**raw_response)
         return MsisdnInfo(
             msisdn=hlr_response.msisdn,
-            mccmnc=f'{hlr_response.hlrMCC}0{hlr_response.hlrMNC}',
+            mccmnc=f'{hlr_response.nrhMCC}0{hlr_response.nrhMNC}',
             ported=hlr_response.ported,
             presents=hlr_response.present,
             roaming=hlr_response.roaming,
