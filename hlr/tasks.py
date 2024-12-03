@@ -90,14 +90,14 @@ async def handle_task(
         *(hlr_client.get_mccmnc_info(msisdn=task.msisdn, provider=task.provider_name) for task in tasks),
         return_exceptions=True,
     )
-    print(results)
     for result in results:
         print(result)
         msisdn_info, hlr_error = None, None
         if isinstance(result, HlrResponse):
             try:
                 parser = create_parser(HlrParserType[result.source_name.upper()])
-                context_log = parse_context_log(result.context_log)
+                context_log = parse_context_log(result.context_log, result)
+                print(f'context_log: {context_log}')
                 msisdn_info = parser.get_msisdn_info(context_log)
                 msisdn_info.request_id = result.message_id if (
                     result.message_id
@@ -159,7 +159,6 @@ def celery_task_handler(task_id: int,
         task.in_progress()
         task.save()
         hlr_task_details.append(task)
-
     handled_tasks = loop.run_until_complete(handle_task(hlr_tasks, hlr_client))
     # print(handled_tasks)
     for result in handled_tasks:
