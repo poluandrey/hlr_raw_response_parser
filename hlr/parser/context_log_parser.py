@@ -60,6 +60,6 @@ def parse_context_log(context_log: str, result) -> dict[str, Any]:
         return json.loads(raw_response)
     except json.JSONDecodeError as error:
         # если ошибка возвращаем ответ алариса что бы достать из него данные
-        return result
+        return result.model_dump()
         # raise InvalidRawResponseError from error
 
