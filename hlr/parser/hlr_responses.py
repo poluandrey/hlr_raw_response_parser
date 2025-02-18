@@ -93,3 +93,23 @@ class NetnumberHlrResponse(BaseModel):
     response_code: int
     message: str
     mnis: NetumberMnis
+
+
+class GTelecomOriginalNetDetail(BaseModel):
+    name: str
+    mccmnc: str
+
+
+
+class GTelecomHlrDetail(BaseModel):
+    is_ported: str
+    detected_telephone_number: str
+    live_status: str
+    original_network_details: GTelecomOriginalNetDetail
+
+
+class GTelecomHlrResponse(BaseModel):
+    results: list[GTelecomHlrDetail]
+
+
+

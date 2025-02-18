@@ -6,7 +6,8 @@ from typing_extensions import NoReturn, assert_never
 
 from hlr.parser.hlr_responses import (InfobipHlrResponse, TmtHlrResponse, NetnumberHlrResponse,
                                       XconnectHlrResponse, XconnectMnpResponse, MittoHlrResponse, TyntecHlrResponse,
-                                      TyntecMnpResponse, DatafoneMnpResponse, SinchMnpResponse, AlarisResponse)
+                                      TyntecMnpResponse, DatafoneMnpResponse, SinchMnpResponse, AlarisResponse,
+                                      GTelecomHlrResponse, GTelecomHlrDetail)
 
 
 class MsisdnInfo(BaseModel):
@@ -187,6 +188,34 @@ class NetnumberHlrParser:
         )
 
 
+class GTelecomHlrParser:
+    def get_msisdn_info(self, raw_response: dict[str: Any]) -> MsisdnInfo:
+        responses: GTelecomHlrResponse = GTelecomHlrResponse(**raw_response)
+        hlr_response = responses.results[0]
+        match hlr_response.live_status:
+            case 'LIVE':
+                presents = True
+            case 'DEAD':
+                presents = False
+            case 'ABSENT_SUBSCRIBER ':
+                presents = False
+            case _:
+                presents = None
+        match hlr_response.is_ported:
+            case 'YES':
+                ported = True
+            case 'NO':
+                ported = False
+            case _:
+                ported = None
+        return MsisdnInfo(
+            msisdn=hlr_response.detected_telephone_number,
+            mccmnc=f'{hlr_response.original_network_details.mccmnc[0:3]}0{hlr_response.original_network_details.mccmnc[3:]}',
+            presents=presents,
+            ported=ported,
+        )
+
+
 class HlrParserType(Enum):
     TMT_HLR = auto()
     INFOBIP_HLR = auto()
@@ -198,6 +227,7 @@ class HlrParserType(Enum):
     NETNUMBER_HLR = auto()
     DATAFON_MNP = auto()
     SINCH_MNP = auto()
+    G_TELECOM_HLR = auto()
 
 
 def create_parser(provider_type: HlrParserType) -> HlrParser:
@@ -222,5 +252,7 @@ def create_parser(provider_type: HlrParserType) -> HlrParser:
             return DatafoneMnpParser()
         case provider_type.SINCH_MNP:
             return SinchMnpParser()
+        case provider_type.G_TELECOM_HLR:
+            return GTelecomHlrParser()
         case _:
             raise assert_never(NoReturn)

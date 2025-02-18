@@ -25,6 +25,8 @@ RAW_RESPONSE_PATTERNS: list[re.Pattern[str]] = [
 
 ]
 
+[{"choice_items":[{"type":"product","carrier_id":1001479,"product_id":11184,"share":""}],"condition":"MRG > -0.05"}]
+
 
 def serialize_context_log(context_log: str) -> dict[str, Any]:
     if not context_log:
