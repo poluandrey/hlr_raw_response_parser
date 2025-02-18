@@ -166,7 +166,7 @@ def celery_task_handler(task_id: int,
     handled_tasks = loop.run_until_complete(handle_task(hlr_tasks, hlr_client))
     # print(handled_tasks)
     for result in handled_tasks:
-        # print(result)
+        print(result)
         try:
             msisdn_info, error = result
         except ContextLogParserError:
@@ -186,6 +186,7 @@ def celery_task_handler(task_id: int,
             continue
 
         print(f'hlr_task_details :{hlr_task_details}')
+        print(f'msisdn_info: {msisdn_info}')
         detail = [
             task for task in hlr_task_details if
             task.msisdn == msisdn_info[0].msisdn and task.product.description == msisdn_info[1].name.lower()
