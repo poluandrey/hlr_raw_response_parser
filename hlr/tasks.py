@@ -96,6 +96,7 @@ async def handle_task(
         if isinstance(result, HlrResponse):
             try:
                 source = result.source_name.upper()
+                print(source)
                 if source == '3GTELECOM_HLR':
                     source = 'G_TELECOM_HLR'
                 parser = create_parser(HlrParserType[source])
