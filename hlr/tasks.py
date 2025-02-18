@@ -187,10 +187,18 @@ def celery_task_handler(task_id: int,
 
         print(f'hlr_task_details :{hlr_task_details}')
         print(f'msisdn_info: {msisdn_info}')
-        detail = [
-            task for task in hlr_task_details if
-            task.msisdn == msisdn_info[0].msisdn and task.product.description == msisdn_info[1].name.lower()
-        ][0]
+        # detail = [
+        #     task for task in hlr_task_details if
+        #     task.msisdn == msisdn_info[0].msisdn and task.product.description == msisdn_info[1].name.lower()
+        # ][0]
+        for task in hlr_task_details:
+            if task.msisdn == msisdn_info[0].msisdn and task.product.description == msisdn_info[1].name.lower():
+                detail = task
+                break
+            if task.product.description == HlrParserType.G_TELECOM_HLR and task.msisdn == msisdn_info[0].msisdn:
+                detail = task
+                break
+
         insert_successful_check(msisdn_info[0], detail)
         detail.ready()
         detail.save()
