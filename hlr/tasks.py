@@ -195,7 +195,7 @@ def celery_task_handler(task_id: int,
             if task.msisdn == msisdn_info[0].msisdn and task.product.description == msisdn_info[1].name.lower():
                 detail = task
                 break
-            if task.product.description == HlrParserType.G_TELECOM_HLR and task.msisdn == msisdn_info[0].msisdn:
+            if task.product.description == '3gtelecom_hlr' and task.msisdn == msisdn_info[0].msisdn:
                 detail = task
                 break
 
