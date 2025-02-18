@@ -95,7 +95,10 @@ async def handle_task(
         msisdn_info, hlr_error = None, None
         if isinstance(result, HlrResponse):
             try:
-                parser = create_parser(HlrParserType[result.source_name.upper()])
+                source = result.source_name.upper()
+                if source == '3GTELECOM_HLR':
+                    source = 'G_TELECOM_HLR'
+                parser = create_parser(HlrParserType[source])
                 context_log = parse_context_log(result.context_log, result)
                 print(f'context_log: {context_log}')
                 msisdn_info = parser.get_msisdn_info(context_log)
