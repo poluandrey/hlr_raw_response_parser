@@ -5,6 +5,7 @@ from itertools import product
 from typing import Generator
 import asyncio
 
+import django_fsm
 from django.conf import settings
 
 from celery import shared_task
@@ -200,7 +201,11 @@ def celery_task_handler(task_id: int,
                 break
 
         insert_successful_check(msisdn_info[0], detail)
-        detail.ready()
+        try:
+            detail.ready()
+        except django_fsm.TransitionNotAllowed:
+            print(detail)
+            pass
         detail.save()
 
     main_task.ready()
