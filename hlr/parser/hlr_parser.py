@@ -95,9 +95,9 @@ class InfobipHlrHlrParser:
         )
 
     def convert_present_to_local_format(self, present) -> Optional[bool]:
-        if present == 'DELIVERD':
+        if present == 'DELIVERED':
             return True
-        if present == 'UNDELIVERED':
+        if present == 'UNDELIVERABLE':
             return False
         return None
 
