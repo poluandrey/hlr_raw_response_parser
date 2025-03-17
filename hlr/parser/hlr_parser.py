@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from typing import Any, Protocol
+from typing import Any, Protocol, Optional
 
 from pydantic import BaseModel, Field
 from typing_extensions import NoReturn, assert_never
@@ -85,6 +85,7 @@ class InfobipHlrHlrParser:
         mnc = result.mccMnc[2:]
         ported = result.ported
         present = result.status.groupName
+
         return MsisdnInfo(
             msisdn=msisdn,
             mccmnc=f'{mcc}0{mnc}',
@@ -92,6 +93,13 @@ class InfobipHlrHlrParser:
             presents=present,
             roaming=result.roaming,
         )
+
+    def convert_present_to_local_format(self, present) -> Optional[bool]:
+        if present == 'DELIVERD':
+            return True
+        if present == 'UNDELIVERED':
+            return False
+        return None
 
 
 class XconnectHlrParser:
