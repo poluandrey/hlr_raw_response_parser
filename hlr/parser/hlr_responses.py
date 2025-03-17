@@ -1,12 +1,17 @@
 from pydantic import BaseModel, Field
 
 
+class InfobipMsisdnStatu(BaseModel):
+    groupName: str
+
+
 class InfobipResult(BaseModel):
     msisdn: str = Field(alias='to')
     mccMnc: str
     imsi: str
     ported: bool
     roaming: bool
+    status: InfobipMsisdnStatu
 
 
 class InfobipHlrResponse(BaseModel):
