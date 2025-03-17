@@ -84,7 +84,7 @@ class InfobipHlrHlrParser:
         mcc = result.mccMnc[:2]
         mnc = result.mccMnc[2:]
         ported = result.ported
-        present = result.status.groupName
+        present = self.convert_present_to_local_format(result.status.groupName)
 
         return MsisdnInfo(
             msisdn=msisdn,
