@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 
-class InfobipMsisdnStatu(BaseModel):
+class InfobipMsisdnStatus(BaseModel):
     groupName: str
 
 
@@ -11,7 +11,7 @@ class InfobipResult(BaseModel):
     imsi: str
     ported: bool
     roaming: bool
-    status: InfobipMsisdnStatu
+    status: InfobipMsisdnStatus
 
 
 class InfobipHlrResponse(BaseModel):
