@@ -1,4 +1,5 @@
 import dataclasses
+import json
 import uuid
 from dataclasses import dataclass
 from itertools import product
@@ -101,9 +102,9 @@ async def handle_task(
                 if source == '3GTELECOM_HLR':
                     source = 'G_TELECOM_HLR'
                 parser = create_parser(HlrParserType[source])
-                context_log = parse_context_log(result.context_log, result)
-                print(f'context_log: {context_log}')
-                msisdn_info = parser.get_msisdn_info(context_log)
+                raw_response = json.loads(result.raw_response)
+                print(f'context_log: {raw_response}')
+                msisdn_info = parser.get_msisdn_info(raw_response)
                 msisdn_info.request_id = result.message_id if (
                     result.message_id
                 ) else str(uuid.uuid4())

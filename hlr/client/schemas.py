@@ -11,4 +11,5 @@ class HlrResponse(BaseModel):
     cached: int
     context_log: str
     message: str | None = Field(default=None)
+    raw_response: str
 
