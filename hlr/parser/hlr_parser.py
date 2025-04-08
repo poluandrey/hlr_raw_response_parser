@@ -112,9 +112,14 @@ class XconnectHlrParser:
     def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
         hlr_response = XconnectHlrResponse(**raw_response)
         presents = self.parse_presents(hlr_response)
+        if len(f'{hlr_response.mcc}{hlr_response.mnc}') == 5:
+            mccmnc = f'{hlr_response.mnc}0{hlr_response.mnc}'
+        else:
+            mccmnc = f'{hlr_response.mnc}{hlr_response.mnc}'
+
         return MsisdnInfo(
             msisdn=hlr_response.msisdn,
-            mccmnc=f'{hlr_response.mcc}0{hlr_response.mnc}',
+            mccmnc=mccmnc,
             ported=hlr_response.ported,
             presents=presents,
             roaming=None,
@@ -134,9 +139,14 @@ class XconnectMnpParser:
 
     def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
         xconnect_response = XconnectMnpResponse(**raw_response)
+
+        if len(f'{xconnect_response.mcc}{xconnect_response.mnc}') == 5:
+            mccmnc = f'{xconnect_response.mcc}0{xconnect_response.mnc}'
+        else:
+            mccmnc = f'{xconnect_response.mcc}{xconnect_response.mnc}'
         return MsisdnInfo(
             msisdn=xconnect_response.msisdn,
-            mccmnc=f'{xconnect_response.mcc}0{xconnect_response.mnc}',
+            mccmnc=mccmnc,
             ported=xconnect_response.ported,
             presents=None,
             roaming=None,
@@ -146,11 +156,14 @@ class XconnectMnpParser:
 class MittoHlrParser:
 
     def get_msisdn_info(self, raw_response: dict[str: Any]) -> MsisdnInfo:
-        # print(raw_response)
         hlr_response = MittoHlrResponse(**raw_response[0])
+        if len(f'{hlr_response.mcc}{hlr_response.mnc}') == 5:
+            mccmnc = f'{hlr_response.mcc}0{hlr_response.mnc}'
+        else:
+            mccmnc = f'{hlr_response.mcc}{hlr_response.mnc}'
         return MsisdnInfo(
             msisdn=hlr_response.msisdn,
-            mccmnc=f'{hlr_response.mcc}0{hlr_response.mnc}',
+            mccmnc=mccmnc,
             ported=hlr_response.ported,
             presents=hlr_response.present,
             roaming=hlr_response.roaming,
@@ -161,9 +174,15 @@ class TyntecHlrParser:
 
     def get_msisdn_info(self, raw_response: dict[str: Any]) -> MsisdnInfo:
         hlr_response = TyntecHlrResponse(**raw_response)
+
+        if len(f'{hlr_response.nrhMCC}{hlr_response.nrhMNC}') == 5:
+            mccmnc = f'{hlr_response.nrhMCC}0{hlr_response.nrhMNC}'
+        else:
+            mccmnc = f'{hlr_response.nrhMCC}{hlr_response.nrhMNC}'
+
         return MsisdnInfo(
             msisdn=hlr_response.msisdn,
-            mccmnc=f'{hlr_response.nrhMCC}0{hlr_response.nrhMNC}',
+            mccmnc=mccmnc,
             ported=hlr_response.ported,
             presents=hlr_response.present,
             roaming=hlr_response.roaming,
@@ -174,9 +193,13 @@ class TyntecMnpParser:
 
     def get_msisdn_info(self, raw_response: dict[str: Any]) -> MsisdnInfo:
         hlr_response = TyntecMnpResponse(**raw_response)
+        if len(f'{hlr_response.mcc}{hlr_response.mnc}') == 5:
+            mccmnc = f'{hlr_response.mcc}0{hlr_response.mnc}'
+        else:
+            mccmnc = f'{hlr_response.mcc}{hlr_response.mnc}'
         return MsisdnInfo(
             msisdn=hlr_response.msisdn,
-            mccmnc=f'{hlr_response.mcc}0{hlr_response.mnc}',
+            mccmnc=mccmnc,
             ported=hlr_response.ported,
             presents=None,
             roaming=None,
@@ -194,10 +217,14 @@ class NetnumberHlrParser:
                 presents = False
             case _:
                 presents = None
+        if len(f'{hlr_response.mnis.mccmnc[0:3]}{hlr_response.mnis.mccmnc[3:]}') == 5:
+            mccmnc = f'{hlr_response.mnis.mccmnc[0:3]}0{hlr_response.mnis.mccmnc[3:]}'
+        else:
+            mccmnc = f'{hlr_response.mnis.mccmnc[0:3]}{hlr_response.mnis.mccmnc[3:]}'
 
         return MsisdnInfo(
             msisdn=hlr_response.mnis.msisdn[1:],
-            mccmnc=f'{hlr_response.mnis.mccmnc[0:3]}0{hlr_response.mnis.mccmnc[3:]}',
+            mccmnc=mccmnc,
             presents=presents,
         )
 
