@@ -86,9 +86,14 @@ class InfobipHlrHlrParser:
         ported = result.ported
         present = self.convert_present_to_local_format(result.status.groupName)
 
+        if len(f'{mcc}{mnc}') == 5:
+            mccmnc = f'{mcc}0{mnc}'
+        else:
+            mccmnc = f'{mcc}{mnc}'
+
         return MsisdnInfo(
             msisdn=msisdn,
-            mccmnc=f'{mcc}0{mnc}',
+            mccmnc=mccmnc,
             ported=ported,
             presents=present,
             roaming=result.roaming,
