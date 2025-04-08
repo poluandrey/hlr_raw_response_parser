@@ -113,9 +113,9 @@ class XconnectHlrParser:
         hlr_response = XconnectHlrResponse(**raw_response)
         presents = self.parse_presents(hlr_response)
         if len(f'{hlr_response.mcc}{hlr_response.mnc}') == 5:
-            mccmnc = f'{hlr_response.mnc}0{hlr_response.mnc}'
+            mccmnc = f'{hlr_response.mcc}0{hlr_response.mnc}'
         else:
-            mccmnc = f'{hlr_response.mnc}{hlr_response.mnc}'
+            mccmnc = f'{hlr_response.mcc}{hlr_response.mnc}'
 
         return MsisdnInfo(
             msisdn=hlr_response.msisdn,
