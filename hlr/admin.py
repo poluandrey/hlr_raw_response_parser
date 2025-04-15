@@ -57,6 +57,7 @@ class TaskAdmin(admin.ModelAdmin[Task]):
                     # ищем колонку с названием "Destination number" без учёта регистра
                     destination_col = next((col for col in df.columns if col.strip().lower() == 'destination number'),
                                            None)
+                    print(destination_col)
                     if destination_col:
                         column_data = df[destination_col]
                     else:
