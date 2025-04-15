@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 from django.http.response import HttpResponse
+import pandas as pd
 
 from hlr.models import Task, TaskDetail, HlrProduct
 from hlr.forms import TaskCreateForm
@@ -39,10 +40,34 @@ class TaskAdmin(admin.ModelAdmin[Task]):
         hlrs_external_id = list(form.cleaned_data['hlr'].values_list('product_id', flat=True))
 
         if upload_file:
-            for chunk in upload_file.chunks():
-                msisdn_from_file = chunk.decode('utf-8-sig').replace('\n', '').strip().split('\r')
-                msisdn_from_file = list(set(msisdn.lstrip('\ufeff') for msisdn in msisdn_from_file))
-                msisdns.extend(filter(lambda msisdn: True if msisdn else False, msisdn_from_file))
+            file_name = upload_file.name.lower()
+            try:
+                # Определяем формат
+                if file_name.endswith('.csv'):
+                    df = pd.read_csv(upload_file, encoding='utf-8-sig')
+                elif file_name.endswith(('.xlsx', '.xls')):
+                    df = pd.read_excel(upload_file)
+                else:
+                    raise ValueError("Unsupported file format")
+
+                # Определяем нужную колонку
+                if df.shape[1] == 1:
+                    column_data = df.iloc[:, 0]
+                else:
+                    # ищем колонку с названием "Destination number" без учёта регистра
+                    destination_col = next((col for col in df.columns if col.strip().lower() == 'destination number'),
+                                           None)
+                    if destination_col:
+                        column_data = df[destination_col]
+                    else:
+                        raise ValueError("Destination number column not found in uploaded file")
+
+                msisdn_from_file = column_data.dropna().astype(str).map(str.strip).map(lambda x: x.lstrip('\ufeff'))
+                msisdns.extend(msisdn_from_file.tolist())
+
+            except Exception as e:
+                # Обработка ошибок, если нужно вывести пользователю — можно логгировать или кидать ValidationError
+                print(f"Error processing uploaded file: {e}")
 
         if msisdn_field:
             msisdns.extend(msisdn_field.split(','))
