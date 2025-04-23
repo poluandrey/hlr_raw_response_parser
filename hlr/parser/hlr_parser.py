@@ -93,7 +93,7 @@ class TmtMnpHlrParser:
 
         return MsisdnInfo(
             mccmnc=mccmnc,
-            ported=True if hlr_response.np == 1 else False,
+            ported=True if hlr_response.np == 'yes' else False,
             roaming=None,
         )
 
