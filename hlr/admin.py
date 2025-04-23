@@ -37,7 +37,9 @@ class TaskAdmin(admin.ModelAdmin[Task]):
         msisdns = []
         msisdn_field = form.cleaned_data['msisdn']
         upload_file = form.cleaned_data['file']
-        hlrs_external_id = list(form.cleaned_data['hlr'].values_list('product_id', flat=True))
+        hlrs = list(form.cleaned_data['hlr'].values_list('product_id', flat=True))
+        mnps = list(form.cleaned_data['mnp'].values_list('product_id', flat=True))
+        hlrs_external_id = hlrs + mnps
 
         if upload_file:
             file_name = upload_file.name.lower()
