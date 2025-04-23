@@ -104,7 +104,7 @@ class InfobipHlrHlrParser:
         hlr_response = InfobipHlrResponse(**raw_response)
         result = hlr_response.results[0]
         msisdn = result.msisdn
-        mcc = result.mccMnc[:2]
+        mcc = result.mccMnc[:3]
         mnc = result.mccMnc[3:]
         ported = result.ported
         present = self.convert_present_to_local_format(result.status.groupName)
