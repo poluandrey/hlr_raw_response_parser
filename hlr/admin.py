@@ -104,7 +104,7 @@ class TaskDetailAdmin(admin.ModelAdmin):
     ]
 
     readonly_fields = ['author']
-    list_filter = ['task__author__username', 'msisdn']
+    list_filter = ['task__author__username',]
     actions = ['export_as_csv']
 
     def export_as_csv(self, request, queryset):

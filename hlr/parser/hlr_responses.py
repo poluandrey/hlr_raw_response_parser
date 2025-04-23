@@ -107,6 +107,15 @@ class NetnumberHlrResponse(BaseModel):
     mnis: NetumberMnis
 
 
+class NetnumberCid(BaseModel):
+    hni: str
+    pi: int = 0
+    tel: str
+
+class NetnumberMnpResponse(BaseModel):
+    cid: NetnumberCid
+
+
 class GTelecomOriginalNetDetail(BaseModel):
     name: str
     mccmnc: str

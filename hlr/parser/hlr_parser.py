@@ -7,7 +7,7 @@ from typing_extensions import NoReturn, assert_never
 from hlr.parser.hlr_responses import (InfobipHlrResponse, TmtHlrResponse, NetnumberHlrResponse,
                                       XconnectHlrResponse, XconnectMnpResponse, MittoHlrResponse, TyntecHlrResponse,
                                       TyntecMnpResponse, DatafoneMnpResponse, SinchMnpResponse, AlarisResponse,
-                                      GTelecomHlrResponse, GTelecomHlrDetail, MittoMnpResponse)
+                                      GTelecomHlrResponse, GTelecomHlrDetail, MittoMnpResponse, NetnumberMnpResponse)
 
 
 class MsisdnInfo(BaseModel):
@@ -243,6 +243,24 @@ class NetnumberHlrParser:
             msisdn=hlr_response.mnis.msisdn[1:],
             mccmnc=mccmnc,
             presents=presents,
+        )
+
+
+class NetnumberMnpParser:
+
+    def get_msisdn_info(self, raw_response: dict[str: Any]) -> MsisdnInfo:
+        hlr_response = NetnumberMnpResponse(**raw_response)
+        info = hlr_response.cid
+
+        if len(info.hni) == 5:
+            mccmnc = f'{info.hni[0:3]}0{info.hni[3:]}'
+        else:
+            mccmnc = info.hni
+
+        return MsisdnInfo(
+            msisdn=info.tel[1:],
+            mccmnc=mccmnc,
+            ported=bool(info.pi),
         )
 
 
