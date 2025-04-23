@@ -7,7 +7,7 @@ from typing_extensions import NoReturn, assert_never
 from hlr.parser.hlr_responses import (InfobipHlrResponse, TmtHlrResponse, NetnumberHlrResponse,
                                       XconnectHlrResponse, XconnectMnpResponse, MittoHlrResponse, TyntecHlrResponse,
                                       TyntecMnpResponse, DatafoneMnpResponse, SinchMnpResponse, AlarisResponse,
-                                      GTelecomHlrResponse, GTelecomHlrDetail)
+                                      GTelecomHlrResponse, GTelecomHlrDetail, MittoMnpResponse)
 
 
 class MsisdnInfo(BaseModel):
@@ -170,6 +170,24 @@ class MittoHlrParser:
         )
 
 
+class MittoMnpParser:
+
+    def get_msisdn_info(self, raw_response: dict[str: Any]) -> MsisdnInfo:
+        mnp_response = MittoMnpResponse(**raw_response)
+
+        if len(f'{mnp_response.mcc}{mnp_response.mnc}') == 5:
+            mccmnc = f'{mnp_response.mcc}0{mnp_response.mnc}'
+        else:
+            mccmnc = f'{mnp_response.nrhMCC}{mnp_response.nrhMNC}'
+
+        return MsisdnInfo(
+            msisdn=mnp_response.msisdn,
+            mccmnc=mccmnc,
+            ported=mnp_response.ported,
+            roaming=mnp_response.roaming,
+        )
+
+
 class TyntecHlrParser:
 
     def get_msisdn_info(self, raw_response: dict[str: Any]) -> MsisdnInfo:
@@ -263,6 +281,7 @@ class HlrParserType(Enum):
     XCONNECT_HLR = auto()
     XCONNECT_MNP = auto()
     MITTO_HLR = auto()
+    MITTO_MNP = auto()
     TYNTEC_HLR = auto()
     TYNTEC_MNP = auto()
     NETNUMBER_HLR = auto()
@@ -295,5 +314,7 @@ def create_parser(provider_type: HlrParserType) -> HlrParser:
             return SinchMnpParser()
         case provider_type.G_TELECOM_HLR:
             return GTelecomHlrParser()
+        case provider_type.MITTO_MNP:
+            return MittoMnpParser()
         case _:
             raise assert_never(NoReturn)

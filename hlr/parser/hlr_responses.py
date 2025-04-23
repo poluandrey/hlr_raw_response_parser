@@ -70,6 +70,13 @@ class MittoHlrResponse(BaseModel):
     ported: bool
 
 
+class MittoMnpResponse(BaseModel):
+    mcc: str
+    mnc: str
+    msisdn: str
+    ported: bool
+
+
 class TyntecHlrResponse(BaseModel):
     nrhMCC: str
     nrhMNC: str
@@ -115,6 +122,8 @@ class GTelecomHlrDetail(BaseModel):
 
 class GTelecomHlrResponse(BaseModel):
     results: list[GTelecomHlrDetail]
+
+
 
 
 
