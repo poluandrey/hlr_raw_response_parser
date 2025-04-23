@@ -15,7 +15,6 @@ from pydantic import Field
 from alaris.models import Product
 from hlr.client.schemas import HlrResponse
 from hlr.models import TaskDetail, Task as DbTask
-from hlr.parser.context_log_parser import parse_context_log
 from hlr.parser.errors import ContextLogParserError
 from hlr.parser.hlr_parser import create_parser, HlrParserType, MsisdnInfo
 from hlr.client.errors import (HlrClientError, HlrClientHTTPError,
@@ -102,9 +101,18 @@ async def handle_task(
                 if source == '3GTELECOM_HLR':
                     source = 'G_TELECOM_HLR'
                 parser = create_parser(HlrParserType[source])
-                raw_response = json.loads(result.raw_response)
+                try:
+                    raw_response = json.loads(result.raw_response)
+                except json.decoder.JSONDecodeError:
+                    # в случае подключения по ENUM ответ может быть не сериализуем
+                    raw_response = result.raw_response
+
+
                 print(f'context_log: {raw_response}')
                 msisdn_info = parser.get_msisdn_info(raw_response)
+                if not msisdn_info.msisdn:
+                    msisdn_info.msisdn = result.msisdn
+
                 msisdn_info.request_id = result.message_id if (
                     result.message_id
                 ) else str(uuid.uuid4())
