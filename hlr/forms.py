@@ -33,7 +33,7 @@ class TaskCreateForm(forms.ModelForm):
         if not (cleaned_data.get('msisdn') or cleaned_data.get('file')):
             raise ValidationError('fill msisdn or upload file')
 
-        if not mnp or hlr:
+        if not any([mnp, hlr]):
             raise ValidationError('choose source')
 
     class Meta:
