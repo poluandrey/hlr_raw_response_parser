@@ -173,7 +173,7 @@ class MittoHlrParser:
 class MittoMnpParser:
 
     def get_msisdn_info(self, raw_response: dict[str: Any]) -> MsisdnInfo:
-        mnp_response = MittoMnpResponse(**raw_response)
+        mnp_response = MittoMnpResponse(**raw_response[0])
 
         if len(f'{mnp_response.mcc}{mnp_response.mnc}') == 5:
             mccmnc = f'{mnp_response.mcc}0{mnp_response.mnc}'
