@@ -11,7 +11,7 @@ from hlr.parser.hlr_responses import (InfobipHlrResponse, TmtHlrResponse, TMTMnp
 
 
 class MsisdnInfo(BaseModel):
-    msisdn: Optional[str]
+    msisdn: Optional[str] = None # не все возвращают в ответе исходный тел
     mccmnc: str
     ported: bool | None = Field(default=None)
     presents: bool | None = Field(default=None)
