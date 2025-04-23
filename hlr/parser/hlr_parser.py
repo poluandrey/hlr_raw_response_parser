@@ -183,7 +183,7 @@ class MittoMnpParser:
         return MsisdnInfo(
             msisdn=mnp_response.msisdn,
             mccmnc=mccmnc,
-            roaming=mnp_response.ported,
+            ported=mnp_response.ported,
         )
 
 
