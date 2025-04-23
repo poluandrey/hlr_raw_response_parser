@@ -13,7 +13,7 @@ class TaskCreateForm(forms.ModelForm):
             'class': 'hlr-checkbox-select-multiply',
         }),
         queryset=HlrProduct.objects.filter(type__icontains='hlr'),
-        label="HLR продукты"
+        label="HLR products"
     )
 
     mnp = forms.ModelMultipleChoiceField(
@@ -22,7 +22,7 @@ class TaskCreateForm(forms.ModelForm):
             'class': 'mnp-checkbox-select-multiply',
         }),
         queryset=HlrProduct.objects.filter(type__icontains='mnp'),
-        label="MNP продукты"
+        label="MNP products"
     )
 
     def clean(self):
@@ -40,6 +40,7 @@ class TaskCreateForm(forms.ModelForm):
         model = Task
         fields = [
             'msisdn',
-            'hlr',
             'file',
+            'hlr',
+            'mnp',
         ]
