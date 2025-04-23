@@ -4,14 +4,14 @@ from typing import Any, Protocol, Optional
 from pydantic import BaseModel, Field
 from typing_extensions import NoReturn, assert_never
 
-from hlr.parser.hlr_responses import (InfobipHlrResponse, TmtHlrResponse, NetnumberHlrResponse,
+from hlr.parser.hlr_responses import (InfobipHlrResponse, TmtHlrResponse, TMTMnpResponse, NetnumberHlrResponse,
                                       XconnectHlrResponse, XconnectMnpResponse, MittoHlrResponse, TyntecHlrResponse,
                                       TyntecMnpResponse, DatafoneMnpResponse, SinchMnpResponse, AlarisResponse,
                                       GTelecomHlrResponse, GTelecomHlrDetail, MittoMnpResponse, NetnumberMnpResponse)
 
 
 class MsisdnInfo(BaseModel):
-    msisdn: str
+    msisdn: Optional[str]
     mccmnc: str
     ported: bool | None = Field(default=None)
     presents: bool | None = Field(default=None)
@@ -72,6 +72,30 @@ class TmtHlrHlrParser:
                 return True
             case _:
                 return False
+
+
+class TmtMnpHlrParser:
+
+    def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
+        parts = raw_response.strip("!").split(";")
+        parsed = {}
+        for part in parts:
+            if "=" in part:
+                key, value = part.split("=", 1)
+                parsed[key] = value
+
+        # Создаем модель
+        hlr_response = TMTMnpResponse(**parsed)
+        if len(f'{hlr_response.mcc}0{hlr_response.mnc}') == 6:
+            mccmnc = f'{hlr_response.mcc}0{hlr_response.mnc}'
+        else:
+            mccmnc = f'{hlr_response.mcc}{hlr_response.mnc}'
+
+        return MsisdnInfo(
+            mccmnc=mccmnc,
+            ported=True if hlr_response.np == 1 else False,
+            roaming=None,
+        )
 
 
 class InfobipHlrHlrParser:
@@ -294,6 +318,7 @@ class GTelecomHlrParser:
 
 class HlrParserType(Enum):
     TMT_HLR = auto()
+    TMT_MNP = auto()
     INFOBIP_HLR = auto()
     XCONNECT_HLR = auto()
     XCONNECT_MNP = auto()
@@ -312,6 +337,8 @@ def create_parser(provider_type: HlrParserType) -> HlrParser:
     match provider_type:
         case provider_type.TMT_HLR:
             return TmtHlrHlrParser()
+        case provider_type.TMT_MNP:
+            return TmtMnpHlrParser()
         case provider_type.TYNTEC_MNP:
             return TyntecMnpParser()
         case provider_type.INFOBIP_HLR:

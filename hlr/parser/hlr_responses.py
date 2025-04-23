@@ -28,6 +28,11 @@ class TmtHlrResponse(BaseModel):
     type: str
 
 
+class TMTMnpResponse(BaseModel):
+    mcc: str
+    mnc: str
+    np: str
+
 class DatafoneMnpResponse(BaseModel):
     msisdn: str = Field(alias='dnis')
     mccmnc: str
