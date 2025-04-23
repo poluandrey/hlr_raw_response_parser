@@ -103,10 +103,9 @@ class InfobipHlrHlrParser:
     def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
         hlr_response = InfobipHlrResponse(**raw_response)
         result = hlr_response.results[0]
-        print(result)
         msisdn = result.msisdn
         mcc = result.mccMnc[:2]
-        mnc = result.mccMnc[2:]
+        mnc = result.mccMnc[3:]
         ported = result.ported
         present = self.convert_present_to_local_format(result.status.groupName)
 
