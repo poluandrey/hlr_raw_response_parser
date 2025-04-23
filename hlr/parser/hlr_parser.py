@@ -326,6 +326,8 @@ def create_parser(provider_type: HlrParserType) -> HlrParser:
             return TyntecHlrParser()
         case provider_type.NETNUMBER_HLR:
             return NetnumberHlrParser()
+        case provider_type.NETNUMBER_MNP:
+            return NetnumberMnpParser()
         case provider_type.DATAFON_MNP:
             return DatafoneMnpParser()
         case provider_type.SINCH_MNP:
