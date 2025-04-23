@@ -302,6 +302,7 @@ class HlrParserType(Enum):
     TYNTEC_HLR = auto()
     TYNTEC_MNP = auto()
     NETNUMBER_HLR = auto()
+    NETNUMBER_MNP = auto()
     DATAFON_MNP = auto()
     SINCH_MNP = auto()
     G_TELECOM_HLR = auto()
