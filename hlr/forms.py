@@ -12,7 +12,7 @@ class TaskCreateForm(forms.ModelForm):
         widget=forms.CheckboxSelectMultiple(attrs={
             'class': 'hlr-checkbox-select-multiply',
         }),
-        queryset=HlrProduct.objects.filter(product__icontains='hlr'),
+        queryset=HlrProduct.objects.filter(type__icontains='hlr'),
         label="HLR продукты"
     )
 
@@ -21,7 +21,7 @@ class TaskCreateForm(forms.ModelForm):
         widget=forms.CheckboxSelectMultiple(attrs={
             'class': 'mnp-checkbox-select-multiply',
         }),
-        queryset=HlrProduct.objects.filter(product__icontains='mnp'),
+        queryset=HlrProduct.objects.filter(type__icontains='mnp'),
         label="MNP продукты"
     )
 
