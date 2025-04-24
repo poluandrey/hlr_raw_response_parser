@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -138,6 +140,13 @@ class GTelecomHlrResponse(BaseModel):
     results: list[GTelecomHlrDetail]
 
 
+class MediafonMnpResult(BaseModel):
+    mcc: str
+    mnc: str
+    isPorted: Optional[bool]
+    msisdn: str
 
 
-
+class MediafonMnpResponse(BaseModel):
+    requestId: str
+    results: list[MediafonMnpResult]

@@ -6,8 +6,8 @@ from typing_extensions import NoReturn, assert_never
 
 from hlr.parser.hlr_responses import (InfobipHlrResponse, TmtHlrResponse, TMTMnpResponse, NetnumberHlrResponse,
                                       XconnectHlrResponse, XconnectMnpResponse, MittoHlrResponse, TyntecHlrResponse,
-                                      TyntecMnpResponse, DatafoneMnpResponse, SinchMnpResponse, AlarisResponse,
-                                      GTelecomHlrResponse, GTelecomHlrDetail, MittoMnpResponse, NetnumberMnpResponse)
+                                      TyntecMnpResponse, DatafoneMnpResponse, AlarisResponse,
+                                      GTelecomHlrResponse, MittoMnpResponse, NetnumberMnpResponse, MediafonMnpResponse)
 
 
 class MsisdnInfo(BaseModel):
@@ -315,6 +315,23 @@ class GTelecomHlrParser:
         )
 
 
+class MediafonMnpParser:
+
+    def get_msisdn_info(self, raw_response) -> MsisdnInfo:
+        response = MediafonMnpResponse(**raw_response)
+        info = response.results[0]
+
+        while len(info.mnc) < 3:
+            mcc = f'0{info.mnc}'
+
+        mccmnc = f'{info.mcc}{info.mnc}'
+        return MsisdnInfo(
+            msisdn=info.msisdn,
+            mccmnc=mccmnc,
+            ported=info.isPorted,
+
+        )
+
 class HlrParserType(Enum):
     TMT_HLR = auto()
     TMT_MNP = auto()
@@ -330,6 +347,7 @@ class HlrParserType(Enum):
     DATAFON_MNP = auto()
     SINCH_MNP = auto()
     G_TELECOM_HLR = auto()
+    MEDIAFON_MNP = auto()
 
 
 def create_parser(provider_type: HlrParserType) -> HlrParser:
@@ -362,5 +380,7 @@ def create_parser(provider_type: HlrParserType) -> HlrParser:
             return GTelecomHlrParser()
         case provider_type.MITTO_MNP:
             return MittoMnpParser()
+        case provider_type.MEDIAFON_MNP:
+            return MediafonMnpParser()
         case _:
             raise assert_never(NoReturn)
