@@ -323,7 +323,7 @@ class MediafonMnpParser:
 
         mnc = str(info.mnc)
         while len(mnc) < 3:
-            mnc = f'0{info.mnc}'
+            mnc = f'0{mnc}'
 
         mccmnc = f'{info.mcc}{mnc}'
         return MsisdnInfo(
