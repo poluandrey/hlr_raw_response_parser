@@ -321,7 +321,8 @@ class MediafonMnpParser:
         response = MediafonMnpResponse(**raw_response)
         info = response.results[0]
 
-        while len(str(info.mnc)) < 3:
+        mnc = str(info.mnc)
+        while len(mnc) < 3:
             mnc = f'0{info.mnc}'
 
         mccmnc = f'{info.mcc}{mnc}'
