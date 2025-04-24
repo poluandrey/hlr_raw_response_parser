@@ -141,8 +141,8 @@ class GTelecomHlrResponse(BaseModel):
 
 
 class MediafonMnpResult(BaseModel):
-    mcc: str
-    mnc: str
+    mcc: int
+    mnc: int
     isPorted: Optional[bool]
     msisdn: str
 
