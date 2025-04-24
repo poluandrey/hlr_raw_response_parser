@@ -7,7 +7,9 @@ from typing_extensions import NoReturn, assert_never
 from hlr.parser.hlr_responses import (InfobipHlrResponse, TmtHlrResponse, TMTMnpResponse, NetnumberHlrResponse,
                                       XconnectHlrResponse, XconnectMnpResponse, MittoHlrResponse, TyntecHlrResponse,
                                       TyntecMnpResponse, DatafoneMnpResponse, AlarisResponse,
-                                      GTelecomHlrResponse, MittoMnpResponse, NetnumberMnpResponse, MediafonMnpResponse)
+                                      GTelecomHlrResponse, MittoMnpResponse, NetnumberMnpResponse, MediafonMnpResponse,
+                                      HorisenMnpResponse
+                                      )
 
 
 class MsisdnInfo(BaseModel):
@@ -333,6 +335,33 @@ class MediafonMnpParser:
 
         )
 
+
+class HorisenMnpParser:
+
+    def get_msisdn_info(self, raw_response) -> MsisdnInfo:
+        response = HorisenMnpResponse(**raw_response)
+        info = response.imm
+
+        mnc = info.mnc
+        while len(mnc) < 3:
+            mnc = f'0{mnc}'
+
+        match info.ported:
+            case 'Yes':
+                ported = True
+            case 'No':
+                ported = False
+            case _:
+                ported = None
+
+        return MsisdnInfo(
+            msisdn=info.msisdn,
+            mccmnc=f'{info.mcc}{mnc}',
+            ported=ported,
+        )
+
+
+
 class HlrParserType(Enum):
     TMT_HLR = auto()
     TMT_MNP = auto()
@@ -349,6 +378,7 @@ class HlrParserType(Enum):
     SINCH_MNP = auto()
     G_TELECOM_HLR = auto()
     MEDIAFON_MNP = auto()
+    HORISEN_MNP = auto()
 
 
 def create_parser(provider_type: HlrParserType) -> HlrParser:
@@ -383,5 +413,7 @@ def create_parser(provider_type: HlrParserType) -> HlrParser:
             return MittoMnpParser()
         case provider_type.MEDIAFON_MNP:
             return MediafonMnpParser()
+        case provider_type.HORISEN_MNP:
+            return HorisenMnpParser()
         case _:
             raise assert_never(NoReturn)

@@ -150,3 +150,14 @@ class MediafonMnpResult(BaseModel):
 class MediafonMnpResponse(BaseModel):
     requestId: str
     results: list[MediafonMnpResult]
+
+
+class HorisenImm(BaseModel):
+    msisdn: str
+    mcc: str
+    mnc: str
+    ported: str
+
+
+class HorisenMnpResponse(BaseModel):
+    imm: HorisenImm
