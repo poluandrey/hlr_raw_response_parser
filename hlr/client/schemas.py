@@ -1,15 +1,18 @@
+from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
 class HlrResponse(BaseModel):
+    task_detail_id: Optional[int] = None
     message_id: str
     msisdn: str = Field(alias='dnis')
     source_name: str
-    mccmnc: str
-    result: int
-    ported: int
-    cached: int
-    context_log: str
+    mccmnc: Optional[str] = None
+    result: Optional[int] = None
+    ported: Optional[int] = None
+    cached: Optional[int] = None
+    context_log: Optional[str] = None
     message: str | None = Field(default=None)
-    raw_response: str
+    raw_response: Optional[str] = None
 

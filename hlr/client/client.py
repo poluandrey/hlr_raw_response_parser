@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 from asyncio import Semaphore
 
 import httpx
@@ -11,29 +11,26 @@ sem = Semaphore(10)
 
 
 def handle_hlr_response(hlr_response: dict[str, Any]) -> HlrResponse:
-    print(hlr_response)
-    hlr_resp_result = hlr_response['result']
-    if hlr_resp_result == 0:
-        return HlrResponse(**hlr_response)
+    return HlrResponse(**hlr_response)
 
-    if hlr_resp_result == -2:
-        raise HlrVendorNotFoundError(
-            message=hlr_response['message'],
-            result=hlr_resp_result,
-            message_id=hlr_response['message_id'],
-        )
-
-    message = hlr_response.get('message')
-    if not message:
-        message = hlr_response.get('failed_response')
-
-    raise HlrProxyInternalError(
-        msisdn=hlr_response.get('dnis'),
-        message=message,
-        result=hlr_resp_result,
-        message_id=hlr_response['message_id'],
-        provider=hlr_response['source_name']
-    )
+    # if hlr_resp_result == -2:
+    #     raise HlrVendorNotFoundError(
+    #         message=hlr_response['message'],
+    #         result=hlr_resp_result,
+    #         message_id=hlr_response['message_id'],
+    #     )
+    #
+    # message = hlr_response.get('message')
+    # if not message:
+    #     message = hlr_response.get('failed_response')
+    #
+    # raise HlrProxyInternalError(
+    #     msisdn=hlr_response.get('dnis'),
+    #     message=message,
+    #     result=hlr_resp_result,
+    #     message_id=hlr_response['message_id'],
+    #     provider=hlr_response['source_name']
+    # )
 
 
 class HlrClient:
@@ -66,20 +63,9 @@ class HlrClient:
             self,
             provider: str,
             msisdn: str,
+            task_detail_id: Optional[int] = None,
     ) -> HlrResponse:
-        try:
-            resp = await self.send_mccmnc_request(provider=provider, msisdn=msisdn)
-            print(f'msisdn: {msisdn}, resp: {resp}')
-            resp.raise_for_status()
-            hlr_resp = resp.json()
-            return handle_hlr_response(hlr_resp)
-        except httpx.HTTPStatusError as error:
-            print(error)
-            raise HlrClientHTTPError(
-                error_code=error.response.status_code,
-            ) from error
-        except httpx.HTTPError as error:
-            print(error)
-            raise HlrClientError from error
-        except HlrProxyInternalError as error:
-            print(error)
+        resp = await self.send_mccmnc_request(provider=provider, msisdn=msisdn)
+        resp.raise_for_status()
+        hlr_resp = resp.json()
+        return HlrResponse(task_detail_id=task_detail_id, **hlr_resp)
