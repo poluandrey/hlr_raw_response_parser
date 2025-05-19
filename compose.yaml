@@ -25,6 +25,8 @@ services:
       - "--workers"
       - "${WORKER_COUNT}"
       - "tech_service.wsgi:application"
+    volumes:
+      - ./staticfiles:/usr/src/app/staticfiles
 
   migration:
     build:
