@@ -1,5 +1,6 @@
 from enum import Enum, auto
 from typing import Any, Protocol, Optional
+import re
 
 from pydantic import BaseModel, Field
 from typing_extensions import NoReturn, assert_never
@@ -104,12 +105,17 @@ class HgcMnpParser:
 
     def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
         parts = raw_response.strip("!").split(";")
+        msisdn = None
         parsed = {}
         for part in parts:
             if "=" in part:
                 key, value = part.split("=", 1)
                 parsed[key] = value
 
+        match = re.search(r'msisdn:(\d+)', raw_response)
+        if match:
+            msisdn = match.group(1)
+        parsed['msisdn'] = msisdn
         # Создаем модель
         hlr_response = HGCMnpResponse(**parsed)
         if len(f'{hlr_response.mcc}0{hlr_response.mnc}') == 6:
@@ -124,7 +130,6 @@ class HgcMnpParser:
         return MsisdnInfo(
             mccmnc=mccmnc,
             ported=ported,
-            msisdn=hlr_response.msisdn,
         )
 
 class InfobipHlrHlrParser:
