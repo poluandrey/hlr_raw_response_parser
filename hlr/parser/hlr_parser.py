@@ -8,7 +8,7 @@ from hlr.parser.hlr_responses import (InfobipHlrResponse, TmtHlrResponse, TMTMnp
                                       XconnectHlrResponse, XconnectMnpResponse, MittoHlrResponse, TyntecHlrResponse,
                                       TyntecMnpResponse, DatafoneMnpResponse, AlarisResponse,
                                       GTelecomHlrResponse, MittoMnpResponse, NetnumberMnpResponse, MediafonMnpResponse,
-                                      HorisenMnpResponse
+                                      HorisenMnpResponse, HGCMnpResponse
                                       )
 
 
@@ -99,6 +99,33 @@ class TmtMnpHlrParser:
             roaming=None,
         )
 
+
+class HgcMnpParser:
+
+    def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
+        parts = raw_response.strip("!").split(";")
+        parsed = {}
+        for part in parts:
+            if "=" in part:
+                key, value = part.split("=", 1)
+                parsed[key] = value
+
+        # Создаем модель
+        hlr_response = HGCMnpResponse(**parsed)
+        if len(f'{hlr_response.mcc}0{hlr_response.mnc}') == 6:
+            mccmnc = f'{hlr_response.mcc}0{hlr_response.mnc}'
+        else:
+            mccmnc = f'{hlr_response.mcc}{hlr_response.mnc}'
+        ported = None
+        if hlr_response.ported == 1:
+            ported = True
+        elif hlr_response.ported == -1:
+            ported = False
+        return MsisdnInfo(
+            mccmnc=mccmnc,
+            ported=ported,
+            msisdn=hlr_response.msisdn,
+        )
 
 class InfobipHlrHlrParser:
 
@@ -379,6 +406,7 @@ class HlrParserType(Enum):
     G_TELECOM_HLR = auto()
     MEDIAFON_MNP = auto()
     HORISEN_MNP = auto()
+    HGC_MNP = auto()
 
 
 def create_parser(provider_type: HlrParserType) -> HlrParser:
@@ -415,5 +443,7 @@ def create_parser(provider_type: HlrParserType) -> HlrParser:
             return MediafonMnpParser()
         case provider_type.HORISEN_MNP:
             return HorisenMnpParser()
+        case provider_type.HGC_MNP:
+            return HgcMnpParser()
         case _:
             raise assert_never(NoReturn)

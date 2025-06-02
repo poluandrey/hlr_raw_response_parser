@@ -35,6 +35,13 @@ class TMTMnpResponse(BaseModel):
     mnc: str
     np: str
 
+
+class HGCMnpResponse(BaseModel):
+    mcc: str
+    mnc: str
+    ported: int
+    msisdn: str
+
 class DatafoneMnpResponse(BaseModel):
     msisdn: str = Field(alias='dnis')
     mccmnc: str
@@ -119,6 +126,7 @@ class NetnumberCid(BaseModel):
     pi: int = 0
     tel: str
 
+
 class NetnumberMnpResponse(BaseModel):
     cid: NetnumberCid
 
@@ -126,7 +134,6 @@ class NetnumberMnpResponse(BaseModel):
 class GTelecomOriginalNetDetail(BaseModel):
     name: str
     mccmnc: str
-
 
 
 class GTelecomHlrDetail(BaseModel):
