@@ -113,37 +113,40 @@ async def handle_task(
     )
     # проходим по результатам проверки через аларис
     for result in results:
-        if result.result == 0:
-            source = result.source_name.upper()
+        try:
+            if result.result == 0:
+                source = result.source_name.upper()
 
-            if source == '3GTELECOM_HLR':
-                source = 'G_TELECOM_HLR'
+                if source == '3GTELECOM_HLR':
+                    source = 'G_TELECOM_HLR'
 
-            parser = create_parser(HlrParserType[source])
+                parser = create_parser(HlrParserType[source])
 
-            try:
-                raw_response = json.loads(result.raw_response)
-            except json.decoder.JSONDecodeError:
-                # в случае подключения по ENUM ответ может быть не сериализуем
-                raw_response = result.raw_response
+                try:
+                    raw_response = json.loads(result.raw_response)
+                except json.decoder.JSONDecodeError:
+                    # в случае подключения по ENUM ответ может быть не сериализуем
+                    raw_response = result.raw_response
 
 
-            msisdn_info = parser.get_msisdn_info(raw_response)
-            if not msisdn_info.msisdn:
-                msisdn_info.msisdn = result.msisdn
+                msisdn_info = parser.get_msisdn_info(raw_response)
+                if not msisdn_info.msisdn:
+                    msisdn_info.msisdn = result.msisdn
 
-            msisdn_info.request_id = result.message_id if (
-                result.message_id
-            ) else str(uuid.uuid4())
-            detail_result = DetailTaskResult(task_id=result.task_detail_id, result=result.result, **msisdn_info.model_dump(exclude={'context_log'}))
-        else:
-            detail_result = DetailTaskResult(
-                task_id=result.task_detail_id,
-                result=result.result,
-                msisdn=result.msisdn,
-                message=result.message,
-            )
-        response.append(detail_result)
+                msisdn_info.request_id = result.message_id if (
+                    result.message_id
+                ) else str(uuid.uuid4())
+                detail_result = DetailTaskResult(task_id=result.task_detail_id, result=result.result, **msisdn_info.model_dump(exclude={'context_log'}))
+            else:
+                detail_result = DetailTaskResult(
+                    task_id=result.task_detail_id,
+                    result=result.result,
+                    msisdn=result.msisdn,
+                    message=result.message,
+                )
+            response.append(detail_result)
+        except:
+            print(results)
     return response
 
 
