@@ -53,7 +53,7 @@ class HlrClient:
                                   msisdn: str,
                                   ):
         async with sem:
-            timeout = httpx.Timeout(connect=5.0, read=15.0)
+            timeout = httpx.Timeout(connect=5.0, read=15.0, write=10.0, pool=5.0)
             print(f'msisdn: {msisdn}')
             params = {'dnis': msisdn, 'source_name': provider}
             resp = await self.client.get('mccmnc_request', params=params, timeout=timeout)
