@@ -148,6 +148,7 @@ class HgcHlrParser:
         if match:
             msisdn = match.group(1)
         parsed['msisdn'] = msisdn
+        print(parsed)
         # Создаем модель
         hlr_response = HGCHlrResponse(**parsed)
 
@@ -155,20 +156,23 @@ class HgcHlrParser:
             mccmnc = f'{hlr_response.mcc}0{hlr_response.mnc}'
         else:
             mccmnc = f'{hlr_response.mcc}{hlr_response.mnc}'
+
         ported = None
         if hlr_response.np == 1:
             ported = True
         elif hlr_response.np == -1:
             ported = False
+
         present = None
         if hlr_response.pres == 'yes':
             present = True
         elif hlr_response.pres == 'no':
             present = False
         return MsisdnInfo(
+            msisdn=msisdn,
             mccmnc=mccmnc,
             ported=ported,
-            present=present,
+            presents=present,
         )
 
 class InfobipHlrHlrParser:
