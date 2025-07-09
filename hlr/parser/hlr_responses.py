@@ -46,7 +46,7 @@ class HGCMnpResponse(BaseModel):
 class HGCHlrResponse(BaseModel):
     mcc: str
     mnc: str
-    np: int
+    np: str
     msisdn: str
     pres: str
 
