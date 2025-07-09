@@ -113,6 +113,7 @@ async def handle_task(
     )
     # проходим по результатам проверки через аларис
     for result in results:
+        print(result)
         try:
             if result.result == 0:
                 source = result.source_name.upper()
@@ -190,45 +191,7 @@ def celery_task_handler(task_id: int,
         task.save()
         hlr_task_details.append(task)
     handled_tasks = loop.run_until_complete(handle_task(hlr_tasks, hlr_client))
-    #
-    # for result in handled_tasks:
-    #     print(result)
-    #     try:
-    #         msisdn_info, error = result
-    #     except ContextLogParserError:
-    #         # need to add logging
-    #         main_task.ready()
-    #         main_task.save()
-    #         return
-    #     if error:
-    #         print(error)
-    #         detail = [
-    #             task for task in hlr_task_details if
-    #             task.msisdn == error.msisdn and task.product.description == error.provider
-    #         ][0]
-    #         insert_failed_check(error, detail)
-    #         detail.failed()
-    #         detail.save()
-    #         continue
-    #
-    #     print(f'hlr_task_details :{hlr_task_details}')
-    #     print(f'msisdn_info: {msisdn_info}')
-    #
-    #     for task in hlr_task_details:
-    #         if task.msisdn == msisdn_info[0].msisdn and task.product.description == msisdn_info[1].name.lower():
-    #             detail = task
-    #             break
-    #         if task.product.description == '3gtelecom_hlr' and task.msisdn == msisdn_info[0].msisdn:
-    #             detail = task
-    #             break
-    #
-    #     insert_successful_check(msisdn_info[0], detail)
-    #     try:
-    #         detail.ready()
-    #     except django_fsm.TransitionNotAllowed:
-    #         print(detail)
-    #         pass
-    #     detail.save()
+
     for task_detail in handled_tasks:
         task: TaskDetail = next(filter(lambda task: task.id == task_detail.task_id, hlr_task_details))
         task.message = task_detail.message

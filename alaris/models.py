@@ -1,6 +1,8 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from smart_selects.db_fields import ChainedForeignKey
+
 
 class ProductType(models.Model):
     external_id = models.PositiveIntegerField(unique=True)
@@ -21,6 +23,17 @@ class Carrier(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Account(models.Model):
+    external_id = models.PositiveIntegerField(unique=True)
+    currency_code = models.CharField(max_length=10)
+    carrier_external_id = models.ForeignKey(
+        Carrier,
+        to_field='external_id',  # 👈 связываемся по external_id
+        on_delete=models.PROTECT,
+        related_name='accounts'
+    )
 
 
 class Product(models.Model):
@@ -53,3 +66,15 @@ class Product(models.Model):
     def __str__(self):
         return self.caption
         # return f'{self.caption} <{self.type.name}>'
+
+
+class AdminTool(models.Model):
+    class Meta:
+        app_label = 'alaris'
+        managed = False
+        verbose_name = 'Инструмент: выбор аккаунта'
+        verbose_name_plural = 'Инструмент: выбор аккаунта'
+        default_permissions = ()
+
+    def __str__(self):
+        return "AdminTool"

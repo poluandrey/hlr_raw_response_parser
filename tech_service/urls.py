@@ -3,9 +3,13 @@ from django.urls import include, path
 from drf_spectacular.views import (SpectacularAPIView, SpectacularRedocView,
                                    SpectacularSwaggerView)
 
+from alaris.views import get_accounts_by_carrier
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('system_tools.urls')),
+path("get-accounts/", get_accounts_by_carrier, name="get_accounts_by_carrier"),
+
 ]
 # DOCS
 urlpatterns += [
@@ -15,6 +19,8 @@ urlpatterns += [
          name='swagger-ui',
          ),
     path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path("chaining/", include("smart_selects.urls")),
+
 ]
 
 # API

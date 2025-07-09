@@ -1,6 +1,6 @@
 import csv
 
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.urls import reverse
 from django.utils.html import format_html
 from django.http.response import HttpResponse
@@ -12,7 +12,7 @@ from hlr.tasks import celery_task_handler
 
 
 @admin.register(Task)
-class TaskAdmin(admin.ModelAdmin[Task]):
+class TaskAdmin(admin.ModelAdmin):
     list_display = [
         'id',
         'status',
@@ -22,23 +22,46 @@ class TaskAdmin(admin.ModelAdmin[Task]):
         'task_details_link',
     ]
 
+    # ⬇️ Убираем стандартный рендер всех полей
+    fieldsets = [(None, {'fields': []})]
+
+    # ⬇️ Подключаем свой шаблон формы
+    change_form_template = 'admin/hlr/task/change_form.html'
+
     def get_form(self, request, obj=None, **kwargs):
         """
-        Use special form during foo creation
+        Use custom form only when creating a new Task
         """
-        defaults = {}
         if obj is None:
-            defaults['form'] = TaskCreateForm
+            kwargs['form'] = TaskCreateForm
+        return super().get_form(request, obj, **kwargs)
 
-        defaults.update(kwargs)
-        return super().get_form(request, obj, **defaults)
+    def add_view(self, request, form_url='', extra_context=None):
+        if request.method == "POST":
+            form_class = self.get_form(request)
+            form = form_class(request.POST, request.FILES)
+
+            # Вызовем ручной is_valid(), чтобы сработал clean()
+            if not form.is_valid() and hasattr(form, '_custom_errors'):
+                for msg in form._custom_errors:
+                    self.message_user(request, msg, level=messages.ERROR)
+
+        return super().add_view(request, form_url, extra_context)
 
     def save_model(self, request, obj: Task, form, change):
         msisdns = []
         msisdn_field = form.cleaned_data['msisdn']
         upload_file = form.cleaned_data['file']
+
+        if not msisdn_field and not upload_file:
+            self.message_user(request, "Fill msisdn or load file", level=messages.SUCCESS)
+
         hlrs = list(form.cleaned_data['hlr'].values_list('product_id', flat=True))
         mnps = list(form.cleaned_data['mnp'].values_list('product_id', flat=True))
+
+        if not hlrs and not mnps:
+            self.message_user(request, "Choose MNP or HLR provider", level=messages.SUCCESS)
+
         hlrs_external_id = hlrs + mnps
 
         if upload_file:

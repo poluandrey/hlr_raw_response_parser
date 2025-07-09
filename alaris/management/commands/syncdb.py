@@ -3,8 +3,8 @@ from itertools import islice
 from django.core.management import BaseCommand
 from django.conf import settings
 
-from alaris.enterprise_api.schema import Product
-from alaris.models import Carrier as DBCarrier, Product as DBProduct, ProductType
+from alaris.enterprise_api.schema import Product, Account
+from alaris.models import Carrier as DBCarrier, Product as DBProduct, ProductType, Account as DBAccount
 from alaris.enterprise_api.client import EnterpriseClient
 
 
@@ -86,10 +86,37 @@ def handle_product_sync(batch_size, client):
     insert_product(batch_size, new_products)
 
 
+def handle_account_sync(batch_size, client):
+    external_accounts: list[Account] = client.account.get_all()
+    external_account_ids = {account.id for account in external_accounts}
+
+    accounts = DBAccount.objects.all()
+    account_ids = {account.external_id for account in accounts}
+
+    new_account_ids = external_account_ids.difference(account_ids)
+    new_accounts = filter(lambda account: account.id in new_account_ids, external_accounts)
+    insert_account(batch_size, new_accounts)
+
+
+def insert_account(batch_size, new_accounts):
+    while True:
+        batch = list(islice(new_accounts, batch_size))
+        objects = [DBAccount(
+            external_id=account.id,
+            currency_code=account.currency_code,
+            carrier_external_id=DBCarrier.objects.get(external_id=account.car_id),
+        ) for account in batch ]
+
+        if not objects:
+            break
+
+        DBAccount.objects.bulk_create(objects)
+
+
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
-        parser.add_argument('--table-name', choices=['carrier', 'product'], required=True)
+        parser.add_argument('--table-name', choices=['carrier', 'product', 'account'], required=True)
         parser.add_argument('--batch-size', default=500, help='count of records to insert')
 
     def handle(self, *args, **options) -> None:
@@ -100,3 +127,6 @@ class Command(BaseCommand):
 
         if options['table_name'] == 'product':
             handle_product_sync(batch_size, client)
+
+        if options['table_name'] == 'account':
+            handle_account_sync(batch_size, client)

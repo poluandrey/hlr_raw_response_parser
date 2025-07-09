@@ -71,3 +71,29 @@ class Product(BaseModel):
     style: int
     systemid_list: str | None
     use_sender_mccmnc_rates: int
+
+
+class Account(BaseModel):
+    model_config = ConfigDict(extra='ignore')
+    id: int
+    currency_code: str
+    car_id: int
+
+
+class RecurringFee(BaseModel):
+    model_config = ConfigDict(extra='ignore')
+    id: int
+    details: str
+    start_date: str
+    end_date: str
+    direction: int
+
+
+class RecurringFeePeriod(BaseModel):
+    model_config = ConfigDict(extra='ignore')
+
+    rate: int
+    start_date: str
+    volume: int
+
+

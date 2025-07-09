@@ -1,0 +1,46 @@
+{% extends "admin/change_form.html" %}
+
+{% block content %}
+{#  {% if adminform.form.non_field_errors %}#}
+{#    <p class="errornote">{{ adminform.form.non_field_errors }}</p>#}
+{#  {% endif %}#}
+   <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+  <div class="custom-block">
+    <h2>📱 Task Details</h2>
+
+    <!-- Верх: msisdn и file -->
+    <div style="display: flex; gap: 40px; margin-bottom: 20px;">
+      <div style="flex: 1;">
+        <p>
+          <label for="{{ adminform.form.msisdn.id_for_label }}">Msisdn:</label><br>
+          {{ adminform.form.msisdn }}
+        </p>
+      </div>
+      <div style="flex: 1;">
+        <p>
+          <label for="{{ adminform.form.file.id_for_label }}">File:</label><br>
+          {{ adminform.form.file }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Низ: HLR и MNP РЯДОМ -->
+    <div style="display: flex; gap: 40px;">
+      <div style="flex: 1;">
+        <p>
+          <label>HLR products:</label><br>
+          {{ adminform.form.hlr }}
+        </p>
+      </div>
+      <div style="flex: 1;">
+        <p>
+          <label>MNP products:</label><br>
+          {{ adminform.form.mnp }}
+        </p>
+      </div>
+    </div>
+  </div>
+   <button type="submit">Create task</button>
+   </form>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block content %}
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <h3>📥 Download Recurring Fees</h3>
+    {{ download_form.as_p }}
+    <button type="submit" name="download-submit">Скачать Excel</button>
+  </form>
+
+  <hr>
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <h3>📤 Upload Recurring Fees</h3>
+    {{ upload_form.as_p }}
+    <button type="submit" name="upload-submit">Загрузить Excel</button>
+  </form>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(function () {
+      $('#id_download-carrier').change(function () {
+        let carrierId = $(this).val();
+        $.getJSON('/get-accounts/?carrier_id=' + carrierId, function (data) {
+          let accountSelect = $('#id_download-account');
+          accountSelect.empty().append($('<option>', {value: '', text: '---------'}));
+          $.each(data, function (i, account) {
+            accountSelect.append($('<option>', {
+              value: account.id,
+              text: `ID ${account.external_id} (${account.currency_code})`
+            }));
+          });
+        });
+      });
+    });
+  </script>
+  <script>
+    $(function () {
+      setTimeout(function () {
+        $('.messagelist').fadeOut('slow');
+      }, 1000);  // 10 000 мс = 10 секунд
+    });
+  </script>
+{% endblock %}
