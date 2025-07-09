@@ -158,10 +158,10 @@ class HgcHlrParser:
         ported = None
         if hlr_response.np == 1:
             ported = True
-        elif hlr_response.ported == -1:
+        elif hlr_response.np == -1:
             ported = False
         present = None
-        if hlr_response.pres =='yes':
+        if hlr_response.pres == 'yes':
             present = True
         elif hlr_response.pres == 'no':
             present = False
