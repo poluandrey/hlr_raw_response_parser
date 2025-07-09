@@ -168,6 +168,12 @@ class HgcHlrParser:
             present = True
         elif hlr_response.pres == 'no':
             present = False
+        print(MsisdnInfo(
+            msisdn=msisdn,
+            mccmnc=mccmnc,
+            ported=ported,
+            presents=present,
+        ))
         return MsisdnInfo(
             msisdn=msisdn,
             mccmnc=mccmnc,
