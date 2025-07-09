@@ -1,8 +1,6 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from smart_selects.db_fields import ChainedForeignKey
-
 
 class ProductType(models.Model):
     external_id = models.PositiveIntegerField(unique=True)
