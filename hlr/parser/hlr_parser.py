@@ -9,7 +9,7 @@ from hlr.parser.hlr_responses import (InfobipHlrResponse, TmtHlrResponse, TMTMnp
                                       XconnectHlrResponse, XconnectMnpResponse, MittoHlrResponse, TyntecHlrResponse,
                                       TyntecMnpResponse, DatafoneMnpResponse, AlarisResponse,
                                       GTelecomHlrResponse, MittoMnpResponse, NetnumberMnpResponse, MediafonMnpResponse,
-                                      HorisenMnpResponse, HGCMnpResponse
+                                      HorisenMnpResponse, HGCMnpResponse, HGCHlrResponse
                                       )
 
 
@@ -130,6 +130,45 @@ class HgcMnpParser:
         return MsisdnInfo(
             mccmnc=mccmnc,
             ported=ported,
+        )
+
+
+class HgcHlrParser:
+
+    def get_msisdn_info(self, raw_response: dict[str, Any]) -> MsisdnInfo:
+        parts = raw_response.strip("!").split(";")
+        msisdn = None
+        parsed = {}
+        for part in parts:
+            if "=" in part:
+                key, value = part.split("=", 1)
+                parsed[key] = value
+
+        match = re.search(r'msisdn:(\d+)', raw_response)
+        if match:
+            msisdn = match.group(1)
+        parsed['msisdn'] = msisdn
+        # Создаем модель
+        hlr_response = HGCHlrResponse(**parsed)
+
+        if len(f'{hlr_response.mcc}0{hlr_response.mnc}') == 6:
+            mccmnc = f'{hlr_response.mcc}0{hlr_response.mnc}'
+        else:
+            mccmnc = f'{hlr_response.mcc}{hlr_response.mnc}'
+        ported = None
+        if hlr_response.np == 1:
+            ported = True
+        elif hlr_response.ported == -1:
+            ported = False
+        present = None
+        if hlr_response.pres =='yes':
+            present = True
+        elif hlr_response.pres == 'no':
+            present = False
+        return MsisdnInfo(
+            mccmnc=mccmnc,
+            ported=ported,
+            present=present,
         )
 
 class InfobipHlrHlrParser:
@@ -412,6 +451,7 @@ class HlrParserType(Enum):
     MEDIAFON_MNP = auto()
     HORISEN_MNP = auto()
     HGC_MNP = auto()
+    HGC_HLR = auto()
 
 
 def create_parser(provider_type: HlrParserType) -> HlrParser:
@@ -450,5 +490,7 @@ def create_parser(provider_type: HlrParserType) -> HlrParser:
             return HorisenMnpParser()
         case provider_type.HGC_MNP:
             return HgcMnpParser()
+        case provider_type.HGC_HLR:
+            return HgcHlrParser()
         case _:
             raise assert_never(NoReturn)

@@ -42,6 +42,14 @@ class HGCMnpResponse(BaseModel):
     ported: int
     msisdn: str
 
+
+class HGCHlrResponse(BaseModel):
+    mcc: str
+    mnc: str
+    np: int
+    msisdn: str
+    pres: str
+
 class DatafoneMnpResponse(BaseModel):
     msisdn: str = Field(alias='dnis')
     mccmnc: str
