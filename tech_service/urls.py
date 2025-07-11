@@ -8,7 +8,7 @@ from alaris.views import get_accounts_by_carrier
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('system_tools.urls')),
-path("get-accounts/", get_accounts_by_carrier, name="get_accounts_by_carrier"),
+    path("mnp/get-accounts/", get_accounts_by_carrier, name="get_accounts_by_carrier"),
 
 ]
 # DOCS
