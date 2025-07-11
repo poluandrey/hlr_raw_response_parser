@@ -28,6 +28,12 @@ class AccountAdmin(admin.ModelAdmin):
 class AdminToolAdmin(admin.ModelAdmin):
     change_list_template = "admin/carrier_account_tool.html"
 
+    def get_model_perms(self, request):
+        if request.user.has_perm('alaris.access_recurring_fee_tool'):
+            return {
+                'view': True  # можно также добавить другие права, если нужно
+            }
+        return {}
     def has_add_permission(self, request):
         return False
 

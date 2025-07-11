@@ -72,8 +72,9 @@ class AdminTool(models.Model):
         managed = False
         verbose_name = 'recurring fee tool'
         verbose_name_plural = 'recurring fee tool'
-        default_permissions = ()
-
+        permissions = [
+            ("access_recurring_fee_tool", "Can access Recurring Fee Tool"),
+        ]
 
     def __str__(self):
-        return "AdminTool"
+        return "RecurringFeeTool"
