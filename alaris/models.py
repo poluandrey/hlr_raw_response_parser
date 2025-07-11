@@ -70,9 +70,10 @@ class AdminTool(models.Model):
     class Meta:
         app_label = 'alaris'
         managed = False
-        verbose_name = 'Инструмент: выбор аккаунта'
-        verbose_name_plural = 'Инструмент: выбор аккаунта'
+        verbose_name = 'recurring fee tool'
+        verbose_name_plural = 'recurring fee tool'
         default_permissions = ()
+
 
     def __str__(self):
         return "AdminTool"

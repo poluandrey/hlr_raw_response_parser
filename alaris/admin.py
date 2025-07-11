@@ -28,6 +28,9 @@ class AccountAdmin(admin.ModelAdmin):
 class AdminToolAdmin(admin.ModelAdmin):
     change_list_template = "admin/carrier_account_tool.html"
 
+    def has_add_permission(self, request):
+        return False
+
     def get_urls(self):
         urls = super().get_urls()
         custom = [
