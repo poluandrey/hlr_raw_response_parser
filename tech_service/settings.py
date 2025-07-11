@@ -45,6 +45,7 @@ THIRD_PARTY_APPS = [
     'drf_spectacular',
     'django_extensions',
     'django_fsm',
+    'smart_selects',
 ]
 
 
@@ -185,6 +186,6 @@ HLR_LOGIN = env('HLR_SERVICE_LOGIN')
 HLR_PASSWORD = env('HLR_SERVICE_PASSWORD')
 HLR_BASE_URL = env('HLR_SERVICE_BASE_URL')
 
-# ALARIS Eneterprise API
+# ALARIS Enterprise API
 EAPI_BASE_URL = env('EAPI_BASE_URL')
 EAPI_AUTH = env('EAPI_AUTH')

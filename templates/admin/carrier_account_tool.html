@@ -23,7 +23,8 @@
     $(function () {
       $('#id_download-carrier').change(function () {
         let carrierId = $(this).val();
-        $.getJSON('mnp/get-accounts/?carrier_id=' + carrierId, function (data) {
+        const getAccountsUrl = "{% url 'get_accounts_by_carrier' %}";
+        $.getJSON(getAccountsUrl + '?carrier_id=' + carrierId, function (data) {
           let accountSelect = $('#id_download-account');
           accountSelect.empty().append($('<option>', {value: '', text: '---------'}));
           $.each(data, function (i, account) {
