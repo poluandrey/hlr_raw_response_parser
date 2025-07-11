@@ -45,7 +45,6 @@ THIRD_PARTY_APPS = [
     'drf_spectacular',
     'django_extensions',
     'django_fsm',
-    'smart_selects',
 ]
 
 
