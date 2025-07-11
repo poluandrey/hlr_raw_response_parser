@@ -5,7 +5,8 @@ from typing import Any
 import httpx
 
 from alaris.enterprise_api.errors import EnterpriseApiError
-from alaris.enterprise_api.schema import JsonRpcResponse, Carrier, Product, Account, RecurringFee, RecurringFeePeriod
+from alaris.enterprise_api.schema import JsonRpcResponse, Carrier, Product, Account, RecurringFee, RecurringFeePeriod, \
+    UpdateRecurringFee
 
 
 class EnterpriseClient:
@@ -38,13 +39,16 @@ class EnterpriseCursor:
                 'auth': self.auth,
             },
         }
+        print(body)
         try:
             resp = self.client.post(json=body, url='eapi/')
             resp.raise_for_status()
             payload = resp.json()
             result = JsonRpcResponse(**payload)
-
+            print(result)
             if result.error:
+                print(result)
+
                 raise EnterpriseApiError(code=result.error.code, message=result.error.message)
 
             return result
@@ -161,8 +165,17 @@ class RecurringFeeClient:
             method='get_recur_fee_list',
             params=params,
         )
-        print(params)
         return [RecurringFee(**recurring_fee) for recurring_fee in payload.result.data]
+
+    def update(self, recurring_fees: UpdateRecurringFee):
+        params = recurring_fees.model_dump()
+        print(params)
+        payload = self.cursor.exec(
+            method='update_recur_fee',
+            params=params,
+        )
+        print(payload)
+        return payload
 
 
 class RecurringFeePeriodClient:

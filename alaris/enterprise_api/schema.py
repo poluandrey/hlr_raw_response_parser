@@ -97,16 +97,10 @@ class RecurringFeePeriod(BaseModel):
     volume: int
 
 
-class CreateUpdateRecurringFee(BaseModel):
+class UpdateRecurringFee(BaseModel):
     id: Optional[int] = None
     details: str
     start_date: str
     end_date: str
-    direction: int
-    confirm_charge: int = 0
-    product_type_id: int = 100
-    invoice_group_index: float
     period_list: Optional[str]
-    acc_id: Optional[int] = None
-    mode: int = 1
-    comments: str = 'auto created recurring fee'
+    comments: str = 'auto update recurring fee'

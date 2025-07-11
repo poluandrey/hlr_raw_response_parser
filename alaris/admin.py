@@ -1,5 +1,6 @@
 from datetime import datetime
 from io import BytesIO
+import json
 
 import pandas as pd
 from django.conf import settings
@@ -9,8 +10,10 @@ from django.urls import path
 from django.shortcuts import render, redirect
 
 from .enterprise_api.client import EnterpriseClient
+from .enterprise_api.schema import UpdateRecurringFee
 from .models import Carrier, Account, AdminTool
 from .forms import DownloadForm, UploadForm
+
 
 @admin.register(Carrier)
 class CarrierAdmin(admin.ModelAdmin):
@@ -37,6 +40,7 @@ class AdminToolAdmin(admin.ModelAdmin):
         upload_form = UploadForm(request.POST or None, request.FILES or None, prefix='upload')
 
         if request.method == 'POST':
+            client = EnterpriseClient(base_url=settings.EAPI_BASE_URL, auth=settings.EAPI_AUTH)
             if 'download-submit' in request.POST and download_form.is_valid():
                 carrier = download_form.cleaned_data['carrier']
                 account = download_form.cleaned_data['account']
@@ -45,7 +49,7 @@ class AdminToolAdmin(admin.ModelAdmin):
                 end_date_lower_bound = download_form.cleaned_data['end_date_lower_bound']
                 end_date_upper_bound = download_form.cleaned_data['end_date_upper_bound']
 
-                client = EnterpriseClient(base_url=settings.EAPI_BASE_URL, auth=settings.EAPI_AUTH)
+                # client = EnterpriseClient(base_url=settings.EAPI_BASE_URL, auth=settings.EAPI_AUTH)
                 recurring_fees = client.recurring_fee.get_all(
                     acc_id=account.external_id,
                     start_date1=start_date_lower_bound,
@@ -53,7 +57,6 @@ class AdminToolAdmin(admin.ModelAdmin):
                     end_date1=end_date_lower_bound,
                     end_date2=end_date_upper_bound,
                 )
-
                 records = []
                 for recurring_fee in recurring_fees:
                     rates = client.recurring_fee_period.get_period_list(id=recurring_fee.id)
@@ -85,11 +88,29 @@ class AdminToolAdmin(admin.ModelAdmin):
             elif 'upload-submit' in request.POST and upload_form.is_valid():
                 try:
                     file = request.FILES['upload-file']
+                    print(f'file name: {file}')
                     df = pd.read_excel(file)
                     for row in df.to_dict(orient='records'):
-                        print("Обработка строки:", row)
+                        print(row)
+                        period_list = [{
+                            "rate": str(row["rate"]),
+                            "volume": str(row["volume"]),
+                            "period_start_date": row["period_start_date"]
+                        }]
+                        schema = UpdateRecurringFee(
+                            id=row['id'],
+                            details=row['details'],
+                            start_date=row['start_date'],
+                            end_date=row['end_date'],
+                            period_list=json.dumps(period_list),
+                        )
+                        try:
+                            client.recurring_fee.update(schema)
+                        except Exception as e:
+                            print(e)
                     self.message_user(request, "Файл успешно загружен", level=messages.SUCCESS)
                 except Exception as e:
+                    print(e)
                     self.message_user(request, f"Ошибка при загрузке файла: {e}", level=messages.ERROR)
 
                 return redirect(request.path)
