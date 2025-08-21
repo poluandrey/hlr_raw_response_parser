@@ -87,12 +87,13 @@ class RecurringFee(BaseModel):
     start_date: str
     end_date: str
     direction: int
+    invoice_group_index: int | float
 
 
 class RecurringFeePeriod(BaseModel):
     model_config = ConfigDict(extra='ignore')
 
-    rate: int
+    rate: float
     start_date: str
     volume: int
 
@@ -103,4 +104,5 @@ class UpdateRecurringFee(BaseModel):
     start_date: str
     end_date: str
     period_list: Optional[str]
+    invoice_group_index: float | int
     comments: str = 'auto update recurring fee'
